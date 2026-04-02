@@ -34,7 +34,7 @@
             <a href="#" class="text-[#0A1628] font-semibold">Forgot password?</a>
         </div>
 
-        <button type="submit" class="w-full bg-[#0A1628] text-white font-bold py-4 rounded-xl">
+        <button type="submit" class="btn-login-utama">
             Sign In
         </button>
     </form>
