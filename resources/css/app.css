@@ -1,16 +1,50 @@
 @import 'tailwindcss';
 
-.btn-login-utama {
+.bg-sidebar-gradient {
+    background: linear-gradient(135deg, #0A1628 0%, #122035 50%, #2A3C5C 100%);
+}
+
+.bg-hero-gradient {
+    background: linear-gradient(135deg, #0A1628 0%, #1A2942 50%, #2A3C5C 100%);
+}
+
+.btn-gold-gradient {
+    width: 100%;
+    background: linear-gradient(to right, #D4AF37 0%, #F4C430 100%);
+    font-weight: 600;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    transition: filter 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-gold-gradient:hover {
+    filter: brightness(90%); 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-gold-gradient span {
+    font-size: 1.25rem;
+}
+
+.btn-primary {
     width: 100%;
     background-color: #0A1628;
     color: white;
-    font-weight: bold;
+    font-weight: 600;
     padding-top: 1rem;
     padding-bottom: 1rem;
     border-radius: 0.75rem;
     transition: background-color 0.3s ease;
 }
 
-.btn-login-utama:hover {
+.btn-primary:hover {
     background-color: #1e293b; 
 }

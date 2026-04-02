@@ -26,8 +26,15 @@
                     </div>
 
                     <div class="hidden md:flex items-center gap-8 h-16">
-                        <a href="/" class="text-[#0A1628] font-semibold border-b-2 border-[#D4AF37] h-full flex items-center">Home</a>
-                        <a href="/history" class="text-gray-500 hover:text-[#0A1628] h-full flex items-center">My Bookings</a>
+                        
+                        <a href="/" class="h-full flex items-center {{ request()->is('/') ? 'text-[#0A1628] font-semibold border-b-2 border-[#D4AF37]' : 'text-gray-500 hover:text-[#0A1628] border-b-2 border-transparent' }}">
+                            Home
+                        </a>
+                        
+                        <a href="/history" class="h-full flex items-center {{ request()->is('history') ? 'text-[#0A1628] font-semibold border-b-2 border-[#D4AF37]' : 'text-gray-500 hover:text-[#0A1628] border-b-2 border-transparent' }}">
+                            My Bookings
+                        </a>
+
                     </div>
                 </div>
 
@@ -44,15 +51,17 @@
                     </div>
 
                     <div class="flex items-center gap-3 border-l pl-6">
-                        <img class="w-10 h-10 rounded-full object-cover" src="https://ui-avatars.com/api/?name=Sarah+Johnson&background=random" alt="Avatar">
+                        <div class="bg-cyan-200 rounded-full w-10 h-10 flex items-center justify-center">
+                            <span class="text-sm font-600">
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            </span>
+                        </div>
                         <div class="hidden sm:block">
-                            <p class="text-sm font-semibold text-gray-900">Sarah Johnson</p>
+                            <span class="font-semibold text-gray-700">{{ Auth::user()->name }}</span>
                             <p class="text-xs text-gray-500">Student</p>
                         </div>
-                        <img src="{{ asset($dropdownAsset) }}" alt="Dropdown Menu" class="w-6 h-6 object-contain opacity-70 hover:opacity-100 transition-opacity">
                     </div>
                 </div>
-
             </div>
         </div>
     </nav>

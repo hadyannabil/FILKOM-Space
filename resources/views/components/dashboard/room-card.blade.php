@@ -1,20 +1,24 @@
-@props(['title', 'capacity'])
+@props(['title', 'capacity', 'image'])
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
     
-    <div class="h-48 bg-slate-200 flex items-center justify-center text-slate-400">
-        Gambar Ruangan
+    <div class="h-48 overflow-hidden">
+        <img src="{{ asset('assets/dashboard/' . $image) }}" 
+             alt="{{ $title }}" 
+             class="w-full h-full object-cover">
     </div>
 
-    <div class="p-6 flex-1 flex flex-col">
+    <div class="px-6 pt-4 pb-6 flex-1 flex flex-col">
         <h4 class="font-bold text-xl text-[#0A1628]">{{ $title }}</h4>
 
-        <div class="mt-2 mb-4 text-gray-500 text-sm">
-            👥 {{ $capacity }} Seats
+        <div class="mt-2 mb-4 text-gray-500 text-sm flex items-center gap-2">
+            <img src="{{ asset('assets/dashboard/seats.webp') }}" alt="Capacity Icon" class="w-5 h-5 object-contain">
+            
+            <span>{{ $capacity }} Seats</span>
         </div>
 
-        <button class="w-full mt-auto bg-[#0A1628] hover:bg-slate-800 text-white py-2 rounded-lg font-semibold">
+        <a href="{{ route('reserve') }}" class="block text-center w-full mt-auto bg-[#0A1628] hover:bg-slate-800 text-white py-2 rounded-lg font-semibold transition duration-200">
             Reserve Room
-        </button>
+        </a>
     </div>
 </div>
