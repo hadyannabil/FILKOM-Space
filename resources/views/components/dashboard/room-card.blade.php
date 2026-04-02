@@ -1,3 +1,5 @@
+@props(['title', 'capacity'])
+
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
     
     <div class="h-48 bg-slate-200 flex items-center justify-center text-slate-400">
