@@ -114,9 +114,7 @@
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit" class="w-full flex items-center gap-3 px-5 py-3 text-gray-600 hover:bg-gray-50 hover:text-red-600 transition-colors">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
-                                            </svg>
+                                            <img src="{{ asset('assets/navbar/power.webp') }}" alt="Power Icon" class="w-4.5 h-4.5 object-contain">
                                             <span class="font-medium text-sm">Log Out</span>
                                         </button>
                                     </form>
