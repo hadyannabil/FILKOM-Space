@@ -1,4 +1,4 @@
-<x-layout.layout notificationCount="3">
+<x-layout.layout>
     <section class="bg-hero-gradient py-16 px-4 sm:px-6 lg:px-8 text-center text-white">
         <h1 class="text-4xl md:text-5xl font-bold mb-4">Find Your Perfect Space</h1>
         <p class="text-gray-300 text-lg mb-10">Search and book rooms across FILKOM campus</p>
@@ -89,18 +89,21 @@
                 title="Room F3.1" 
                 capacity="40" 
                 image="ruang-kelas.webp" 
+                slug="Room F3.1"
             />
             
             <x-dashboard.room-card 
                 title="Algorithm Auditorium" 
                 capacity="150" 
                 image="auditorium-algoritma.webp" 
+                slug="Algorithm Auditorium"
             />
             
             <x-dashboard.room-card 
                 title="Room G1.3" 
                 capacity="30" 
                 image="lab.webp" 
+                slug="Room G1.3"
             />
         </div>
         </div>

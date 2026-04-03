@@ -9,7 +9,7 @@
                     <div class="bg-yellow-100 p-2 rounded-lg text-yellow-600">
                         <img src="{{ asset('assets/reservation/room.webp') }}" alt="Room Icon" class="w-6 h-6 object-contain">
                     </div>
-                    <h2 class="text-2xl font-bold text-[#0A1628]">Reserve Room F3.1</h2>
+                    <h2 class="text-2xl font-bold text-[#0A1628]">Reserve {{ $roomName }}</h2>
                 </div>
                 <p class="text-gray-500 text-sm">Fill out the form below to submit your room reservation request.</p>
             </div>

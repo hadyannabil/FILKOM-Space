@@ -4,6 +4,10 @@
     background: linear-gradient(135deg, #0A1628 0%, #122035 50%, #2A3C5C 100%);
 }
 
+.bg-utama {
+    background: linear-gradient(135deg, #0A1628 0%, #122035 50%, #2A3C5C 100%);
+}
+
 .bg-hero-gradient {
     background: linear-gradient(135deg, #0A1628 0%, #1A2942 50%, #2A3C5C 100%);
 }

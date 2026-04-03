@@ -29,9 +29,11 @@ Route::get('/', function () {
     return view('dashboard');
 })->name('dashboard');
 
-Route::get('/reserve', function () {
-    return view('reservation'); 
-})->name('reserve');
+Route::get('/reserve/{room}', function ($room) {
+    return view('reservation', [
+        'roomName' => $room
+    ]);
+})->middleware('auth')->name('reserve');
 
 Route::get('/history', function () {
     return view('history'); 
@@ -40,3 +42,14 @@ Route::get('/history', function () {
 Route::post('/reserve/submit', function (\Illuminate\Http\Request $request) {
     return redirect()->route('history');
 })->name('reserve.submit');
+
+Route::post('/logout', function (Request $request) {
+    Auth::logout();
+ 
+    $request->session()->invalidate();
+ 
+    $request->session()->regenerateToken();
+ 
+    return redirect('/login');
+})->name('logout');
+

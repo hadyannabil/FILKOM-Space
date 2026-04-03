@@ -1,4 +1,4 @@
-@props(['title', 'capacity', 'image'])
+@props(['title', 'capacity', 'image', 'slug'])
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
     
@@ -17,7 +17,7 @@
             <span>{{ $capacity }} Seats</span>
         </div>
 
-        <a href="{{ route('reserve') }}" class="block text-center w-full mt-auto bg-[#0A1628] hover:bg-slate-800 text-white py-2 rounded-lg font-semibold transition duration-200">
+        <a href="{{ route('reserve', $slug) }}" class="block text-center w-full mt-auto bg-[#0A1628] hover:bg-slate-800 text-white py-2 rounded-lg font-semibold transition duration-200">
             Reserve Room
         </a>
     </div>
