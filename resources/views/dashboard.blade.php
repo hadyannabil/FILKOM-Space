@@ -12,19 +12,50 @@
                 <div class="text-left">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Start Time</label>
                     <select class="w-full border-gray-200 rounded-lg px-4 py-2 border">
-                        <option>08:00 AM</option>
+                        @for ($i = 0; $i < 24; $i++)
+                            @php
+                                $dbValue = sprintf('%02d:00', $i);
+                                
+                                $displayTime = \Carbon\Carbon::createFromTime($i, 0, 0)->format('h:i A');
+                                
+                                $isSelected = ($i == 8) ? 'selected' : '';
+                            @endphp
+                            
+                            <option value="{{ $dbValue }}" {{ $isSelected }}>
+                                {{ $displayTime }}
+                            </option>
+                        @endfor
                     </select>
                 </div>
                 <div class="text-left">
                     <label class="block text-sm font-medium text-gray-600 mb-1">End Time</label>
                     <select class="w-full border-gray-200 rounded-lg px-4 py-2 border">
-                        <option>09:00 AM</option>
+                        @for ($i = 0; $i < 24; $i++)
+                            @php
+                                $dbValue = sprintf('%02d:00', $i);
+                                
+                                $displayTime = \Carbon\Carbon::createFromTime($i, 0, 0)->format('h:i A');
+                                
+                                $isSelected = ($i == 9) ? 'selected' : '';
+                            @endphp
+                            
+                            <option value="{{ $dbValue }}" {{ $isSelected }}>
+                                {{ $displayTime }}
+                            </option>
+                        @endfor
                     </select>
                 </div>
                 <div class="text-left">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Rooms</label>
                     <select class="w-full border-gray-200 rounded-lg px-4 py-2 border">
                         <option>All rooms</option>
+                        @for ($floor = 2; $floor <= 4; $floor++)
+                            @for ($room = 1; $room <= 5; $room++)
+                                <option value="F{{ $floor }}.{{ $room }}">
+                                    Room F{{ $floor }}.{{ $room }}
+                                </option>
+                            @endfor
+                        @endfor
                     </select>
                 </div>
             </div>

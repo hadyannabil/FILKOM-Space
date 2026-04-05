@@ -40,7 +40,7 @@ Route::get('/history', function () {
     return view('history'); 
 })->name('history');
 
-Route::post('/reserve/submit', function (\Illuminate\Http\Request $request) {
+Route::post('/reserve/submit', function () {
     return redirect()->route('history');
 })->name('reserve.submit');
 
@@ -51,6 +51,6 @@ Route::post('/logout', function (Request $request) {
  
     $request->session()->regenerateToken();
  
-    return redirect('/login');
+    return redirect('/');
 })->name('logout');
 
