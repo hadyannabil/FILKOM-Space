@@ -66,7 +66,7 @@ Route::get('/', function (Request $request) {
             if ($res['room_name'] === $room['title'] && 
                 $res['date'] === $selectedDate && 
                 $res['time'] === $selectedTime && 
-                !in_array($res['status'], ['Rejected', 'Cancelled'])) { 
+                !in_array($res['status'], ['Rejected', 'Cancelled', 'Completed'])) { 
                 return false; 
             }
         }
@@ -133,7 +133,6 @@ Route::post('/reserve/submit', function (Request $request) {
 Route::get('/history', function () {
     $reservations = readReservations();
 
-    // Urutkan dari yang terbaru
     usort($reservations, fn($a, $b) => strcmp($b['created_at'], $a['created_at']));
 
     $total    = count($reservations);
@@ -150,7 +149,6 @@ Route::patch('/reserve/{id}/cancel', function ($id) {
 
     foreach ($reservations as &$reservation) {
         if ($reservation['id'] === $id) {
-            // Hanya izinkan batal jika status masih Pending atau Approved
             if (in_array($reservation['status'], ['Pending', 'Approved'])) {
                 $reservation['status'] = 'Cancelled';
                 $found = true;
@@ -166,14 +164,9 @@ Route::patch('/reserve/{id}/cancel', function ($id) {
 
     if ($found) {
         writeReservations($reservations);
-        return response()->json([
-            'success' => true,
-            'message' => 'Status berhasil diubah menjadi Cancelled'
-        ], 200);
+        return response()->json(['success' => true]);
     }
 
-    return response()->json([
-        'success' => false,
-        'message' => 'Reservasi tidak ditemukan.'
-    ], 404);
+    return response()->json(['success' => false]);
+
 })->middleware('auth')->name('reserve.cancel');
