@@ -3,57 +3,45 @@
         <h1 class="text-4xl md:text-5xl font-bold mb-4">Find Your Perfect Space</h1>
         <p class="text-gray-300 text-lg mb-10">Search and book rooms across FILKOM campus</p>
 
-        <form class="max-w-5xl mx-auto bg-white rounded-xl shadow-2xl p-6 text-gray-800">
+        <form action="{{ route('dashboard') }}" method="GET" class="max-w-5xl mx-auto bg-white rounded-xl shadow-2xl p-6 text-gray-800">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div class="text-left">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Date</label>
-                    <input type="date" class="w-full border-gray-200 rounded-lg focus:ring-[#D4AF37] focus:border-[#D4AF37] px-4 py-2 border">
+                    <input type="date" name="date" value="{{ $selectedDate }}" class="w-full border-gray-200 rounded-lg focus:ring-[#D4AF37] focus:border-[#D4AF37] px-4 py-2 border">
                 </div>
                 <div class="text-left">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Start Time</label>
-                    <select class="w-full border-gray-200 rounded-lg px-4 py-2 border">
+                    <select name="start_time" class="w-full border-gray-200 rounded-lg px-4 py-2 border">
                         @for ($i = 0; $i < 24; $i++)
                             @php
                                 $dbValue = sprintf('%02d:00', $i);
-                                
                                 $displayTime = \Carbon\Carbon::createFromTime($i, 0, 0)->format('h:i A');
-                                
-                                $isSelected = ($i == 8) ? 'selected' : '';
+                                $isSelected = ($dbValue == $startTime) ? 'selected' : '';
                             @endphp
-                            
-                            <option value="{{ $dbValue }}" {{ $isSelected }}>
-                                {{ $displayTime }}
-                            </option>
+                            <option value="{{ $dbValue }}" {{ $isSelected }}>{{ $displayTime }}</option>
                         @endfor
                     </select>
                 </div>
                 <div class="text-left">
                     <label class="block text-sm font-medium text-gray-600 mb-1">End Time</label>
-                    <select class="w-full border-gray-200 rounded-lg px-4 py-2 border">
+                    <select name="end_time" class="w-full border-gray-200 rounded-lg px-4 py-2 border">
                         @for ($i = 0; $i < 24; $i++)
                             @php
                                 $dbValue = sprintf('%02d:00', $i);
-                                
                                 $displayTime = \Carbon\Carbon::createFromTime($i, 0, 0)->format('h:i A');
-                                
-                                $isSelected = ($i == 9) ? 'selected' : '';
+                                $isSelected = ($dbValue == $endTime) ? 'selected' : '';
                             @endphp
-                            
-                            <option value="{{ $dbValue }}" {{ $isSelected }}>
-                                {{ $displayTime }}
-                            </option>
+                            <option value="{{ $dbValue }}" {{ $isSelected }}>{{ $displayTime }}</option>
                         @endfor
                     </select>
                 </div>
                 <div class="text-left">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Rooms</label>
-                    <select class="w-full border-gray-200 rounded-lg px-4 py-2 border">
-                        <option>All rooms</option>
+                    <select name="room_filter" class="w-full border-gray-200 rounded-lg px-4 py-2 border">
+                        <option value="all">All rooms</option>
                         @for ($floor = 2; $floor <= 4; $floor++)
                             @for ($room = 1; $room <= 5; $room++)
-                                <option value="F{{ $floor }}.{{ $room }}">
-                                    Room F{{ $floor }}.{{ $room }}
-                                </option>
+                                <option value="F{{ $floor }}.{{ $room }}">Room F{{ $floor }}.{{ $room }}</option>
                             @endfor
                         @endfor
                     </select>
@@ -61,7 +49,7 @@
             </div>
             
             <button type="submit" class="w-full mt-6 btn-gold-gradient text-[#0A1628]">
-                <img src="{{ asset('assets/dashboard/search.webp') }}" alt="Search Icon" class="w-5.5 h-5.5 object-contain"> 
+                <img src="{{ asset('assets/dashboard/search.webp') }}" alt="Search Icon" class="w-5.5 h-5.5 object-contain inline-block mr-2"> 
                 Search Rooms
             </button>
         </form>
@@ -113,30 +101,24 @@
 
         <div class="flex-1">
             <h2 class="text-2xl font-bold text-[#0A1628] mb-2">Available Rooms</h2>
-            <p class="text-gray-500 mb-6">3 rooms available for your selected time</p>
+            <p class="text-gray-500 mb-6">{{ count($availableRooms) }} rooms available for your selected time</p>
             
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <x-dashboard.room-card 
-                title="Room F3.1" 
-                capacity="40" 
-                image="ruang-kelas.webp" 
-                slug="Room F3.1"
-            />
-            
-            <x-dashboard.room-card 
-                title="Algorithm Auditorium" 
-                capacity="150" 
-                image="auditorium-algoritma.webp" 
-                slug="Algorithm Auditorium"
-            />
-            
-            <x-dashboard.room-card 
-                title="Room G1.3" 
-                capacity="30" 
-                image="lab.webp" 
-                slug="Room G1.3"
-            />
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @forelse ($availableRooms as $room)
+                    <x-dashboard.room-card 
+                        :title="$room['title']" 
+                        :capacity="$room['capacity']" 
+                        :image="$room['image']" 
+                        :slug="$room['slug']"
+                        :selectedDate="$selectedDate"
+                        :selectedTime="$selectedTime"
+                    />
+                @empty
+                    <div class="col-span-full text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                        <p class="text-gray-500">Maaf, tidak ada ruangan yang tersedia di jam tersebut. Silakan cari jam lain.</p>
+                    </div>
+                @endforelse
+            </div>
         </div>
 
     </div>

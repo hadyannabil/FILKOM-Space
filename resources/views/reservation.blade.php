@@ -17,6 +17,8 @@
             <form action="{{ route('reserve.submit') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
+                <input type="hidden" name="room" value="{{ $roomName }}">
+
                 <div class="mb-5">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Event Name</label>
                     <input type="text" name="event_name" required placeholder="Enter event name" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#0A1628] outline-none placeholder-gray-400">
@@ -40,11 +42,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Selected Date</label>
-                        <input type="text" value="April 1, 2026" readonly class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none text-center">
+                        <input type="text" name="selected_date" value="{{ $selectedDate }}" readonly class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none text-center">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Selected Time</label>
-                        <input type="text" value="09:00 - 12:00" readonly class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none text-center">
+                        <input type="text" name="selected_time" value="{{ $selectedTime }}" readonly class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none text-center">
                     </div>
                 </div>
 
