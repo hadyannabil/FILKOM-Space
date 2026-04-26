@@ -104,7 +104,7 @@
                                     </div>
                                     <div class="overflow-hidden">
                                         <span class="block font-semibold text-gray-700 truncate">{{ Auth::user()->name }}</span>
-                                        <span class="block text-xs text-gray-400 mt-0.5 truncate">{{ Auth::user()->prodi }}</span>
+                                        <span class="block text-xs text-gray-400 mt-0.5 truncate">{{ Auth::user()->email }}</span>
                                     </div>
                                 </div>
 
