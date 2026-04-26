@@ -21,8 +21,6 @@ function writeReservations(array $data): void
     file_put_contents(RESERVATIONS_FILE, json_encode($data, JSON_PRETTY_PRINT));
 }
 
-// ─── Guest-only routes (hanya untuk yang belum login) ───────────────────────
-
 Route::middleware('guest')->group(function () {
 
     Route::get('/login', function () {
@@ -69,16 +67,12 @@ Route::middleware('guest')->group(function () {
     })->name('register.proses');
 });
 
-// ─── Logout (hanya untuk yang sudah login) ──────────────────────────────────
-
 Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
     return redirect('/login');
 })->middleware('auth')->name('logout');
-
-// ─── Public routes ───────────────────────────────────────────────────────────
 
 Route::get('/', function (Request $request) {
     $selectedDate = $request->query('date', now()->toDateString());
@@ -116,8 +110,6 @@ Route::get('/', function (Request $request) {
         'selectedTime'   => $selectedTime,
     ]);
 })->name('dashboard');
-
-// ─── Auth-protected routes ───────────────────────────────────────────────────
 
 Route::middleware('auth')->group(function () {
 
