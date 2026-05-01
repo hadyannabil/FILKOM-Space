@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,10 +19,27 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'prodi',
         'email',
         'password',
+        'role',   
     ];
+
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
+
+    public function reservations()
+    {
+        return $this->hasMany(\App\Models\Reservation::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
