@@ -74,6 +74,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])
     Route::get('/approvals/{reservation}',[AdminController::class, 'approvalDetail'])->name('approval.detail');
     Route::post('/approvals/{reservation}/approve', [AdminController::class, 'approve'])->name('approval.approve');
     Route::post('/approvals/{reservation}/reject',  [AdminController::class, 'reject'])->name('approval.reject');
+    Route::get('/reports',                [AdminController::class, 'reports'])->name('reports');
 });
 
 Route::get('/', function (Request $request) {

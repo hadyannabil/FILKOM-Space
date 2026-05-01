@@ -8,6 +8,7 @@ use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -77,5 +78,34 @@ class AdminController extends Controller
 
         return redirect()->route('admin.approvals')
                ->with('success', 'Reservasi telah ditolak.');
+    }
+
+    public function reports(Request $request)
+    {
+        $reservations = Reservation::with(['room', 'user'])
+            ->orderByDesc('reservation_date')
+            ->paginate(10);
+
+        $chartData = Reservation::with('room')
+            ->orderBy('reservation_date')
+            ->get()
+            ->map(fn ($r) => [
+                'id'          => $r->id,
+                'event_name'  => $r->event_name,
+                'event_type'  => $r->event_type ?? 'Lainnya',
+                'pic_name'    => $r->pic_name,
+                'room'        => $r->room->name ?? 'Unknown',
+                'date'        => $r->reservation_date instanceof \Carbon\Carbon
+                                    ? $r->reservation_date->toDateString()
+                                    : (string) $r->reservation_date,
+                'start_time'  => substr($r->start_time, 0, 5),
+                'end_time'    => substr($r->end_time, 0, 5),
+                'attendees'   => (int) $r->attendees,
+                'status'      => $r->status,
+            ])
+            ->values()
+            ->toArray();
+
+        return view('admin.reports', compact('reservations', 'chartData'));
     }
 }
