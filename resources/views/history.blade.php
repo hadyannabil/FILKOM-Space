@@ -83,59 +83,44 @@
 
                         @forelse($reservations as $rsv)
                             @php
-                                $statusTheme = match($rsv['status']) {
-                                    'Approved'  => 'bg-green-50 text-green-700 border-green-100',
-                                    'Pending'   => 'bg-yellow-50 text-yellow-700 border-yellow-100',
-                                    'Completed' => 'bg-blue-50 text-blue-700 border-blue-100',
-                                    'Rejected'  => 'bg-red-50 text-red-700 border-red-100',
-                                    'Cancelled' => 'bg-gray-50 text-gray-500 border-gray-200',
+                                $statusTheme = match(strtolower($rsv->status ?? '')) {
+                                    'approved'  => 'bg-green-50 text-green-700 border-green-100',
+                                    'pending'   => 'bg-yellow-50 text-yellow-700 border-yellow-100',
+                                    'completed' => 'bg-blue-50 text-blue-700 border-blue-100',
+                                    'rejected'  => 'bg-red-50 text-red-700 border-red-100',
+                                    'cancelled' => 'bg-gray-50 text-gray-500 border-gray-200',
                                     default     => 'bg-gray-50 text-gray-700 border-gray-100',
                                 };
 
-                                $durationText = '-'; 
-                                if (isset($rsv['time']) && str_contains($rsv['time'], '-')) {
-                                    $timeParts = explode('-', $rsv['time']);
-                                    if (count($timeParts) === 2) {
-                                        $start = \Carbon\Carbon::parse(trim($timeParts[0]));
-                                        $end = \Carbon\Carbon::parse(trim($timeParts[1]));
-                                        $diffInMinutes = $start->diffInMinutes($end);
-                                        
-                                        $hours = floor($diffInMinutes / 60);
-                                        $minutes = $diffInMinutes % 60;
-                                        
-                                        $durationArray = [];
-                                        if ($hours > 0) {
-                                            $durationArray[] = $hours . ' hour' . ($hours > 1 ? 's' : '');
-                                        }
-                                        if ($minutes > 0) {
-                                            $durationArray[] = $minutes . ' min';
-                                        }
-                                        
-                                        $durationText = implode(' ', $durationArray);
-                                    }
-                                }
+                                $start         = \Carbon\Carbon::parse($rsv->start_time);
+                                $end           = \Carbon\Carbon::parse($rsv->end_time);
+                                $diffInMinutes = $start->diffInMinutes($end);
+                                $hours         = floor($diffInMinutes / 60);
+                                $minutes       = $diffInMinutes % 60;
+                                $durationParts = [];
+                                if ($hours > 0)   $durationParts[] = $hours . ' hour' . ($hours > 1 ? 's' : '');
+                                if ($minutes > 0) $durationParts[] = $minutes . ' min';
+                                $durationText  = count($durationParts) ? implode(' ', $durationParts) : '-';
                             @endphp
 
-                            <tr class="hover:bg-gray-50 transition-colors" id="row-{{ $rsv['id'] }}">
-                                <td class="px-6 py-4 font-semibold text-[#0A1628]">{{ $rsv['event_name'] }}</td>
-                                <td class="px-6 py-4">{{ $rsv['room_name'] }}</td>
+                            <tr class="hover:bg-gray-50 transition-colors" id="row-{{ $rsv->id }}">
+                                <td class="px-6 py-4 font-semibold text-[#0A1628]">{{ $rsv->event_name }}</td>
+                                <td class="px-6 py-4">{{ $rsv->room->name ?? '-' }}</td>
                                 <td class="px-6 py-4">
-                                    <span class="block text-gray-800">{{ $rsv['date'] }}</span>
-                                    <span class="block text-xs text-gray-500 mt-1">{{ $rsv['time'] }}</span>
+                                    <span class="block text-gray-800">{{ \Carbon\Carbon::parse($rsv->reservation_date)->format('d/m/Y') }}</span>
+                                    <span class="block text-xs text-gray-500 mt-1">{{ substr($rsv->start_time, 0, 5) }} - {{ substr($rsv->end_time, 0, 5) }}</span>
                                 </td>
-                                
                                 <td class="px-6 py-4">{{ $durationText }}</td>
-                                
                                 <td class="px-6 py-4">
-                                    <span id="status-badge-{{ $rsv['id'] }}" class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border {{ $statusTheme }}">
-                                        <span id="status-text-{{ $rsv['id'] }}">{{ $rsv['status'] }}</span>
+                                    <span id="status-badge-{{ $rsv->id }}" class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border {{ $statusTheme }}">
+                                        <span id="status-text-{{ $rsv->id }}">{{ ucfirst($rsv->status) }}</span>
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @if(in_array($rsv['status'], ['Approved', 'Pending']))
+                                    @if(in_array(strtolower($rsv->status ?? ''), ['approved', 'pending']))
                                         <button type="button"
-                                            id="btn-cancel-{{ $rsv['id'] }}"
-                                            onclick="openCancelModal('{{ $rsv['id'] }}', '{{ addslashes($rsv['event_name']) }}', '{{ addslashes($rsv['room_name']) }}')"
+                                            id="btn-cancel-{{ $rsv->id }}"
+                                            onclick="openCancelModal('{{ $rsv->id }}', '{{ addslashes($rsv->event_name) }}', '{{ addslashes($rsv->room->name ?? '-') }}')"
                                             class="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:text-red-600 focus:bg-red-50 focus:border-red-200 focus:ring-2 focus:ring-red-200 active:text-red-600 active:bg-red-50 active:border-red-200 outline-none">
                                             Batalkan
                                         </button>
@@ -155,8 +140,8 @@
             </div>
 
             <div class="px-6 py-4 border-t border-gray-100 bg-white">
-                @if(count($reservations) > 0)
-                    <p class="text-sm text-gray-500">Showing 1 to {{ count($reservations) }} of {{ count($reservations) }} results</p>
+                @if($reservations->count() > 0)
+                    <p class="text-sm text-gray-500">Showing 1 to {{ $reservations->count() }} of {{ $reservations->count() }} results</p>
                 @else
                     <p class="text-sm text-gray-500">Showing 0 results</p>
                 @endif
@@ -165,6 +150,7 @@
         </div>
     </div>
 
+    {{-- Cancel Modal --}}
     <div id="cancelModal" class="fixed inset-0 z-[100] hidden bg-gray-900/40 backdrop-blur-sm flex items-center justify-center transition-opacity opacity-0">
         <div id="modalContent" class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95 transition-all duration-300">
             <div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4">
@@ -191,16 +177,16 @@
     <script>
         let currentCancelId = null;
 
-        const modal = document.getElementById('cancelModal');
+        const modal        = document.getElementById('cancelModal');
         const modalContent = document.getElementById('modalContent');
         const eventNameSpan = document.getElementById('modalEventName');
-        const roomNameSpan = document.getElementById('modalRoomName');
+        const roomNameSpan  = document.getElementById('modalRoomName');
 
         function openCancelModal(id, eventName, roomName) {
-            currentCancelId = id;
+            currentCancelId     = id;
             eventNameSpan.textContent = eventName;
-            roomNameSpan.textContent = roomName;
-            
+            roomNameSpan.textContent  = roomName;
+
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
@@ -220,39 +206,34 @@
         }
 
         async function confirmCancel() {
-            if(!currentCancelId) return;
+            if (!currentCancelId) return;
 
             try {
                 const response = await fetch(`/reserve/${currentCancelId}/cancel`, {
-                    method: 'POST', 
+                    method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}', 
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({
-                        _method: 'PATCH' 
-                    })
+                    body: JSON.stringify({ _method: 'PATCH' })
                 });
 
                 const result = await response.json();
 
-                if(response.ok) {
+                if (response.ok) {
                     const statusBadge = document.getElementById('status-badge-' + currentCancelId);
-                    const statusText = document.getElementById('status-text-' + currentCancelId);
-                    const cancelButton = document.getElementById('btn-cancel-' + currentCancelId);
+                    const statusText  = document.getElementById('status-text-'  + currentCancelId);
+                    const cancelBtn   = document.getElementById('btn-cancel-'   + currentCancelId);
 
-                    if(statusBadge && statusText) {
+                    if (statusBadge && statusText) {
                         statusText.textContent = 'Cancelled';
-                        statusBadge.className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-50 text-gray-500 border-gray-200';
+                        statusBadge.className  = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-50 text-gray-500 border-gray-200';
                     }
-                    
-                    if(cancelButton) {
-                        cancelButton.remove();
-                    }
+
+                    if (cancelBtn) cancelBtn.remove();
 
                     closeCancelModal();
-
                 } else {
                     alert('Gagal membatalkan reservasi: ' + result.message);
                 }

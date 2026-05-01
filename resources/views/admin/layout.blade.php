@@ -78,10 +78,9 @@
     <div style="padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);">
         <div style="display:flex;align-items:center;gap:10px;">
             <div style="width:34px;height:34px;background:linear-gradient(135deg,#D4AF37,#f4c430);border-radius:8px;display:flex;align-items:center;justify-content:center;">
-                <svg fill="#0A1628" viewBox="0 0 24 24" style="width:20px;height:20px;">
-                    <path d="M3 21h18V7a2 2 0 00-2-2H5a2 2 0 00-2 2v14z"/>
-                    <path fill="#D4AF37" d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 13h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM9 17h6v4H9z"/>
-                </svg>
+                <div style="width:34px;height:34px;background:linear-gradient(135deg,#D4AF37,#f4c430);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                    <img src="{{ asset('assets/admin/gedung2.png') }}" style="width:20px;height:20px;object-fit:contain;">
+                </div>
             </div>
             <div>
                 <div style="color:#fff;font-weight:700;font-size:0.95rem;line-height:1;">FILKOM Space</div>
@@ -129,9 +128,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:18px;">
             <div class="notif-bell">
-                <svg fill="none" stroke="#6b7280" stroke-width="1.8" viewBox="0 0 24 24" style="width:22px;height:22px;cursor:pointer;">
-                    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
-                </svg>
+                <img src="{{ asset('assets/navbar/notif.webp') }}" style="width:32px;height:32px;object-fit:contain;cursor:pointer;">
                 <span class="notif-count">3</span>
             </div>
             <div style="text-align:right;">

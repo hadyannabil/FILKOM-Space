@@ -335,7 +335,7 @@ function renderMetrics(data) {
             ${changeHtml}
         </div>`;
     }).join('');
-    // animate counters
+    
     grid.querySelectorAll('.metric-value').forEach(el => {
         const target = parseInt(el.dataset.target, 10);
         if (isNaN(target)) return;
@@ -349,7 +349,6 @@ function renderMetrics(data) {
     });
 }
 
-// ─── BAR CHART ──────────────────────────────────────────────────────────
 function renderBarChart(data) {
     const chart  = document.getElementById('bar-chart');
     const labels = document.getElementById('bar-labels');
@@ -375,7 +374,6 @@ function renderBarChart(data) {
     labels.innerHTML = bars.map(b => `<div class="chart-label">${b.label}</div>`).join('');
 }
 
-// ─── DONUT CHART ────────────────────────────────────────────────────────
 function renderDonut(data) {
     const svg    = document.getElementById('donut-svg');
     const legend = document.getElementById('donut-legend');
@@ -393,7 +391,6 @@ function renderDonut(data) {
         return;
     }
 
-    // Remove old arcs
     svg.querySelectorAll('.donut-arc').forEach(e => e.remove());
 
     const R = 44; const C = 2 * Math.PI * R;
@@ -428,7 +425,6 @@ function renderDonut(data) {
     total.textContent = `Total: ${sum} reservasi`;
 }
 
-// ─── ROOM USAGE ─────────────────────────────────────────────────────────
 function renderRoomUsage(data) {
     const body = document.getElementById('room-usage-body');
     const rooms = data.room_usage ?? [];
@@ -450,7 +446,6 @@ function renderRoomUsage(data) {
     }).join('');
 }
 
-// ─── TOP EVENT TYPES ────────────────────────────────────────────────────
 function renderTopEvents(data) {
     const body  = document.getElementById('top-events-body');
     const types = data.event_types ?? [];
@@ -468,7 +463,6 @@ function renderTopEvents(data) {
         </div>`).join('');
 }
 
-// ─── MAIN RENDER ────────────────────────────────────────────────────────
 function renderAll() {
     const rangeIdx = parseInt(document.getElementById('range-select').value || 0, 10);
     const data = getDataForPeriod(currentPeriod, rangeIdx);
@@ -485,7 +479,6 @@ function renderAll() {
         'Detail Reservasi – ' + data.label;
 }
 
-// ─── DATA AGGREGATOR (client-side from PHP raw data) ────────────────────
 function getDataForPeriod(period, rangeIdx) {
     const now = new Date();
 
@@ -505,7 +498,6 @@ function getDataForPeriod(period, rangeIdx) {
             const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
             return { start: isoDate(d), end: isoDate(end) };
         }
-        // yearly
         const year = now.getFullYear() - rangeIdx;
         return { start: `${year}-01-01`, end: `${year}-12-31` };
     }
@@ -513,13 +505,11 @@ function getDataForPeriod(period, rangeIdx) {
     const range = dateRange();
     const all   = RAW.filter(r => r.date >= range.start && r.date <= range.end);
 
-    // Metrics
     const approved  = all.filter(r => r.status === 'approved').length;
     const rejected  = all.filter(r => r.status === 'rejected').length;
     const pending   = all.filter(r => r.status === 'pending').length;
     const cancelled = all.filter(r => r.status === 'cancelled').length;
 
-    // Prev period
     const prevRange = (() => {
         if (period === 'weekly') {
             const pStart = new Date(range.start); pStart.setDate(pStart.getDate() - 7);
@@ -536,10 +526,8 @@ function getDataForPeriod(period, rangeIdx) {
     })();
     const prev = RAW.filter(r => r.date >= prevRange.start && r.date <= prevRange.end);
 
-    // Trend bars
     const trend = buildTrend(all, period, range);
 
-    // Room usage
     const roomMap = {};
     all.forEach(r => { roomMap[r.room] = (roomMap[r.room]||0) + 1; });
     const room_usage = Object.entries(roomMap)
@@ -547,7 +535,6 @@ function getDataForPeriod(period, rangeIdx) {
         .slice(0, 6)
         .map(([name, count]) => ({ name, count }));
 
-    // Event types
     const typeMap = {};
     all.forEach(r => { typeMap[r.event_type] = (typeMap[r.event_type]||0) + 1; });
     const total = all.length || 1;
@@ -609,7 +596,7 @@ function buildTrend(items, period, range) {
             };
         });
     }
-    // yearly – 12 months
+    
     const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
     const year   = parseInt(range.start.split('-')[0]);
     return MONTHS.map((label, i) => {
@@ -637,7 +624,6 @@ function buildLabel(period, rangeIdx, range) {
     return 'Tahun ' + (new Date().getFullYear() - rangeIdx);
 }
 
-// ─── TABLE SEARCH ────────────────────────────────────────────────────────
 function filterDetailTable(q) {
     q = q.toLowerCase().trim();
     let vis = 0;
@@ -655,7 +641,6 @@ function filterDetailTable(q) {
     } else if (vis && emp) { emp.remove(); }
 }
 
-// ─── EXPORT CSV ─────────────────────────────────────────────────────────
 function exportCSV() {
     const rangeIdx = parseInt(document.getElementById('range-select').value||0, 10);
     const data = getDataForPeriod(currentPeriod, rangeIdx);
@@ -690,10 +675,8 @@ function exportCSV() {
     URL.revokeObjectURL(url);
 }
 
-// ─── PRINT ──────────────────────────────────────────────────────────────
 function printReport() { window.print(); }
 
-// ─── INIT ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     populateRangeSelect('weekly');
     renderAll();

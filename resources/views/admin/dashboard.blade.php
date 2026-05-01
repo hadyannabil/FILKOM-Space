@@ -9,21 +9,23 @@
 
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:26px;">
 
+        {{-- Pending Approvals → kuning --}}
         <div class="stat-card" style="position:relative;overflow:hidden;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
                     <p style="font-size:0.8rem;color:#9baac4;font-weight:500;margin:0 0 6px;">Pending Approvals</p>
                     <h2 style="font-size:2.2rem;font-weight:800;color:#0A1628;margin:0;" id="stat-pending">{{ $pendingCount }}</h2>
-                    <p style="font-size:0.78rem;color:#e67e22;font-weight:500;margin:6px 0 0;"></p>
+                    <p style="font-size:0.78rem;color:#b07e00;font-weight:500;margin:6px 0 0;"></p>
                 </div>
-                <div style="width:48px;height:48px;background:#fff5f5;border-radius:12px;display:flex;align-items:center;justify-content:center;">
-                    <svg fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24" style="width:24px;height:24px;">
-                        <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+                <div style="width:48px;height:48px;background:#fff8e6;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                    <svg fill="none" stroke="#D4AF37" stroke-width="2" viewBox="0 0 24 24" style="width:24px;height:24px;">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
                     </svg>
                 </div>
             </div>
         </div>
 
+        {{-- Today's Events --}}
         <div class="stat-card">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
@@ -39,6 +41,7 @@
             </div>
         </div>
 
+        {{-- Total Rooms → aset rooms.png --}}
         <div class="stat-card">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
@@ -47,12 +50,11 @@
                     <p style="font-size:0.78rem;color:#6b7280;font-weight:500;margin:6px 0 0;"></p>
                 </div>
                 <div style="width:48px;height:48px;background:#f0fdf4;border-radius:12px;display:flex;align-items:center;justify-content:center;">
-                    <svg fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24" style="width:24px;height:24px;">
-                        <path d="M3 9h18M9 21V9m6 12V9M3 3h18v18H3z"/>
-                    </svg>
+                    <img src="{{ asset('assets/admin/rooms.png') }}" style="width:26px;height:26px;object-fit:contain;">
                 </div>
             </div>
         </div>
+
     </div>
 
     <div class="stat-card" style="padding:0;overflow:hidden;">
