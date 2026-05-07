@@ -9,7 +9,6 @@
 
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:26px;">
 
-        {{-- Pending Approvals → kuning --}}
         <div class="stat-card" style="position:relative;overflow:hidden;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
@@ -25,7 +24,6 @@
             </div>
         </div>
 
-        {{-- Today's Events --}}
         <div class="stat-card">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
@@ -41,12 +39,11 @@
             </div>
         </div>
 
-        {{-- Total Rooms → aset rooms.png --}}
         <div class="stat-card">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
-                    <p style="font-size:0.8rem;color:#9baac4;font-weight:500;margin:0 0 6px;">Total Rooms</p>
-                    <h2 style="font-size:2.2rem;font-weight:800;color:#0A1628;margin:0;" id="stat-rooms">{{ $totalRooms }}</h2>
+                    <p style="font-size:0.8rem;color:#9baac4;font-weight:500;margin:0 0 6px;">Available Rooms</p>
+                    <h2 style="font-size:2.2rem;font-weight:800;color:#0A1628;margin:0;" id="stat-rooms">{{ $availableRooms }}</h2>
                     <p style="font-size:0.78rem;color:#6b7280;font-weight:500;margin:6px 0 0;"></p>
                 </div>
                 <div style="width:48px;height:48px;background:#f0fdf4;border-radius:12px;display:flex;align-items:center;justify-content:center;">

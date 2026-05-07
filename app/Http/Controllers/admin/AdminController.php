@@ -15,12 +15,16 @@ class AdminController extends Controller
 
     public function dashboard()
     {
-        $pendingCount  = Reservation::where('status', 'pending')->count();
-        $todayEvents   = Reservation::where('reservation_date', today())
-                            ->whereIn('status', ['approved', 'pending'])
+        $pendingCount   = Reservation::where('status', 'pending')->count();
+        $todayEvents    = Reservation::where('reservation_date', today())
+                            ->where('status', 'approved')
                             ->count();
-        $totalRooms    = Room::count();
-        $availableNow  = Room::active()->count();   
+        $busyRoomIds = Reservation::whereIn('status', ['approved', 'pending'])
+                            ->where('reservation_date', today())
+                            ->whereRaw('start_time <= CURTIME()')
+                            ->whereRaw('end_time >= CURTIME()')
+                            ->pluck('room_id');
+        $availableRooms = Room::active()->whereNotIn('id', $busyRoomIds)->count();
 
         $requests = Reservation::with(['user', 'room'])
                         ->where('status', 'pending')
@@ -28,7 +32,7 @@ class AdminController extends Controller
                         ->paginate(7);
 
         return view('admin.dashboard', compact(
-            'pendingCount', 'todayEvents', 'totalRooms', 'availableNow', 'requests'
+            'pendingCount', 'todayEvents', 'availableRooms', 'requests'
         ));
     }
 
