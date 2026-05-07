@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
+// ─── Guest only ───────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
 
     Route::get('/login', fn () => view('login'))->name('login');
@@ -56,6 +57,7 @@ Route::middleware('guest')->group(function () {
     })->name('register.proses');
 });
 
+// ─── Logout ───────────────────────────────────────────────────────────────────
 Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
@@ -63,6 +65,7 @@ Route::post('/logout', function (Request $request) {
     return redirect('/login');
 })->middleware('auth')->name('logout');
 
+// ─── Admin routes (admin only) ────────────────────────────────────────────────
 Route::middleware(['auth', 'admin.only'])
      ->prefix('admin')
      ->name('admin.')
@@ -76,6 +79,7 @@ Route::middleware(['auth', 'admin.only'])
     Route::get('/reports',                 [AdminController::class, 'reports'])->name('reports');
 });
 
+// ─── User-facing routes (admin diblokir) ─────────────────────────────────────
 Route::middleware('user.only')->group(function () {
 
     Route::get('/', function (Request $request) {
@@ -89,10 +93,12 @@ Route::middleware('user.only')->group(function () {
         try {
             $query = Room::active();
 
+            // Filter by building
             if (!empty($selectedBuildings)) {
                 $query->whereIn('building', $selectedBuildings);
             }
 
+            // Filter by capacity range
             if ($selectedCapacity !== '') {
                 [$min, $max] = explode('-', $selectedCapacity);
                 $query->whereBetween('capacity', [(int) $min, (int) $max]);
@@ -113,15 +119,21 @@ Route::middleware('user.only')->group(function () {
         }
 
         try {
-            $bookedRooms = Reservation::where('reservation_date', $selectedDate)
-                ->whereRaw("CONCAT(start_time, ' - ', end_time) = ?", [$selectedTime])
+            // Deteksi overlap waktu: bentrok jika start_time < $endTime DAN end_time > $startTime
+            $bookedRoomIds = Reservation::where('reservation_date', $selectedDate)
                 ->whereNotIn('status', ['rejected', 'cancelled'])
+                ->where('start_time', '<', $endTime)
+                ->where('end_time', '>', $startTime)
                 ->pluck('room_id')
                 ->toArray();
 
-            $availableRooms = array_filter($allRooms, function ($room) use ($bookedRooms) {
-                $r = Room::where('name', $room['title'])->first();
-                return $r ? !in_array($r->id, $bookedRooms) : true;
+            // Build map name->id sekali saja, hindari N+1 query
+            $roomNames = array_column($allRooms, 'title');
+            $roomIdMap = Room::whereIn('name', $roomNames)->pluck('id', 'name')->toArray();
+
+            $availableRooms = array_filter($allRooms, function ($room) use ($bookedRoomIds, $roomIdMap) {
+                $roomId = $roomIdMap[$room['title']] ?? null;
+                return $roomId === null || !in_array($roomId, $bookedRoomIds);
             });
         } catch (\Exception $e) {
             $availableRooms = $allRooms;
@@ -268,6 +280,7 @@ Route::middleware('user.only')->group(function () {
     });
 });
 
+// ─── JSON fallback helpers ────────────────────────────────────────────────────
 function _readJsonReservations(): array {
     $file = storage_path('app/reservations.json');
     return file_exists($file) ? (json_decode(file_get_contents($file), true) ?? []) : [];

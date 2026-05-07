@@ -117,7 +117,11 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @if(in_array(strtolower($rsv->status ?? ''), ['approved', 'pending']))
+                                    @php
+                                        $eventEnd  = \Carbon\Carbon::parse($rsv->reservation_date->format('Y-m-d') . ' ' . $rsv->end_time);
+                                        $isOver    = $eventEnd->isPast();
+                                    @endphp
+                                    @if(in_array(strtolower($rsv->status ?? ''), ['approved', 'pending']) && !$isOver)
                                         <button type="button"
                                             id="btn-cancel-{{ $rsv->id }}"
                                             onclick="openCancelModal('{{ $rsv->id }}', '{{ addslashes($rsv->event_name) }}', '{{ addslashes($rsv->room->name ?? '-') }}')"
