@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
-// ─── Guest only ───────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
 
     Route::get('/login', fn () => view('login'))->name('login');
@@ -57,7 +56,6 @@ Route::middleware('guest')->group(function () {
     })->name('register.proses');
 });
 
-// ─── Logout ───────────────────────────────────────────────────────────────────
 Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
@@ -65,7 +63,6 @@ Route::post('/logout', function (Request $request) {
     return redirect('/login');
 })->middleware('auth')->name('logout');
 
-// ─── Admin routes (admin only) ────────────────────────────────────────────────
 Route::middleware(['auth', 'admin.only'])
      ->prefix('admin')
      ->name('admin.')
@@ -79,17 +76,29 @@ Route::middleware(['auth', 'admin.only'])
     Route::get('/reports',                 [AdminController::class, 'reports'])->name('reports');
 });
 
-// ─── User-facing routes (admin diblokir) ─────────────────────────────────────
 Route::middleware('user.only')->group(function () {
 
     Route::get('/', function (Request $request) {
-        $selectedDate = $request->query('date', now()->toDateString());
-        $startTime    = $request->query('start_time', '08:00');
-        $endTime      = $request->query('end_time', '10:00');
-        $selectedTime = $startTime . ' - ' . $endTime;
+        $selectedDate      = $request->query('date', now()->toDateString());
+        $startTime         = $request->query('start_time', '08:00');
+        $endTime           = $request->query('end_time', '10:00');
+        $selectedTime      = $startTime . ' - ' . $endTime;
+        $selectedBuildings = $request->query('buildings', []);
+        $selectedCapacity  = $request->query('capacity', '');
 
         try {
-            $allRooms = Room::active()->get()->map(fn ($r) => [
+            $query = Room::active();
+
+            if (!empty($selectedBuildings)) {
+                $query->whereIn('building', $selectedBuildings);
+            }
+
+            if ($selectedCapacity !== '') {
+                [$min, $max] = explode('-', $selectedCapacity);
+                $query->whereBetween('capacity', [(int) $min, (int) $max]);
+            }
+
+            $allRooms = $query->get()->map(fn ($r) => [
                 'title'    => $r->name,
                 'capacity' => (string) $r->capacity,
                 'image'    => $r->image ?? 'ruang-kelas.webp',
@@ -119,11 +128,13 @@ Route::middleware('user.only')->group(function () {
         }
 
         return view('dashboard', [
-            'availableRooms' => $availableRooms,
-            'selectedDate'   => $selectedDate,
-            'startTime'      => $startTime,
-            'endTime'        => $endTime,
-            'selectedTime'   => $selectedTime,
+            'availableRooms'    => $availableRooms,
+            'selectedDate'      => $selectedDate,
+            'startTime'         => $startTime,
+            'endTime'           => $endTime,
+            'selectedTime'      => $selectedTime,
+            'selectedBuildings' => $selectedBuildings,
+            'selectedCapacity'  => $selectedCapacity,
         ]);
     })->name('dashboard');
 
@@ -257,7 +268,6 @@ Route::middleware('user.only')->group(function () {
     });
 });
 
-// ─── JSON fallback helpers ────────────────────────────────────────────────────
 function _readJsonReservations(): array {
     $file = storage_path('app/reservations.json');
     return file_exists($file) ? (json_decode(file_get_contents($file), true) ?? []) : [];

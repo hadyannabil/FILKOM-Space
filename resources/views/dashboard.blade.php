@@ -60,42 +60,47 @@
         <aside class="w-full lg:w-1/4">
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h3 class="font-bold text-lg mb-4 text-[#0A1628]">Filters</h3>
-                
-                <div class="mb-6">
-                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Building Location</h4>
-                    <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
-                        <input type="checkbox"> Gedung A
-                    </label>
-                    <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
-                        <input type="checkbox"> Gedung F
-                    </label>
-                    <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
-                        <input type="checkbox"> Gedung G
-                    </label>
-                    <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
-                        <input type="checkbox"> Gedung GKM
-                    </label>
-                </div>
 
-                <div>
-                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Capacity Range</h4>
-                    <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
-                        <input type="radio" name="capacity"> 1-20 people
-                    </label>
-                    <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
-                        <input type="radio" name="capacity"> 21-50 people
-                    </label>
-                    <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
-                        <input type="radio" name="capacity"> 51-100 people
-                    </label>
-                    <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
-                        <input type="radio" name="capacity"> 101-200 people
-                    </label>
-                </div>
+                <form action="{{ route('dashboard') }}" method="GET" id="filter-form">
+                    {{-- Pertahankan nilai search utama --}}
+                    <input type="hidden" name="date" value="{{ $selectedDate }}">
+                    <input type="hidden" name="start_time" value="{{ $startTime }}">
+                    <input type="hidden" name="end_time" value="{{ $endTime }}">
+                    <input type="hidden" name="room_filter" value="{{ request('room_filter', 'all') }}">
 
-                <button class="w-full mt-6 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg">
-                    Clear All Filters
-                </button>
+                    <div class="mb-6">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Building Location</h4>
+                        @foreach (['A Building' => 'Gedung A', 'F Building' => 'Gedung F', 'G Building' => 'Gedung G', 'GKM Building' => 'Gedung GKM'] as $value => $label)
+                            <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
+                                <input type="checkbox"
+                                       name="buildings[]"
+                                       value="{{ $value }}"
+                                       {{ in_array($value, $selectedBuildings) ? 'checked' : '' }}
+                                       onchange="document.getElementById('filter-form').submit()">
+                                {{ $label }}
+                            </label>
+                        @endforeach
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Capacity Range</h4>
+                        @foreach (['1-50' => '1-50 people', '51-100' => '51-100 people', '101-200' => '101-200 people'] as $val => $label)
+                            <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
+                                <input type="radio"
+                                       name="capacity"
+                                       value="{{ $val }}"
+                                       {{ $selectedCapacity === $val ? 'checked' : '' }}
+                                       onchange="document.getElementById('filter-form').submit()">
+                                {{ $label }}
+                            </label>
+                        @endforeach
+                    </div>
+
+                    <a href="{{ route('dashboard', ['date' => $selectedDate, 'start_time' => $startTime, 'end_time' => $endTime]) }}"
+                       class="block w-full mt-6 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg text-center">
+                        Clear All Filters
+                    </a>
+                </form>
             </div>
         </aside>
 
