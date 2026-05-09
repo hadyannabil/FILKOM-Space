@@ -18,9 +18,6 @@
     .metric-icon { width: 44px; height: 44px; border-radius: 11px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
     .metric-value { font-size: 2rem; font-weight: 800; color: #0A1628; line-height: 1; }
     .metric-label { font-size: 0.78rem; color: #9baac4; font-weight: 500; margin-top: 4px; }
-    .metric-change { font-size: 0.75rem; font-weight: 600; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
-    .change-up   { color: #16a34a; }
-    .change-down { color: #dc2626; }
 
     /* Chart card */
     .chart-card { background: #fff; border-radius: 14px; border: 1px solid #eaecf5; overflow: hidden; }
@@ -136,27 +133,14 @@
         </div>
     </div>
 
-    {{-- Room Usage + Top Events Row --}}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;">
-
-        {{-- Room Usage --}}
+    {{-- Top Rooms Full Width --}}
+    <div style="margin-bottom:20px;">
         <div class="chart-card">
             <div class="chart-header">
-                <h3 class="chart-title">Penggunaan Ruangan</h3>
-                <span style="font-size:0.75rem;color:#9baac4;" id="room-subtitle">Total reservasi per ruangan</span>
+                <h3 class="chart-title">Top Rooms</h3>
+                <span style="font-size:0.75rem;color:#9baac4;">Ruangan paling sering dipesan</span>
             </div>
-            <div class="chart-body" id="room-usage-body">
-                {{-- filled by JS --}}
-            </div>
-        </div>
-
-        {{-- Top Events --}}
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">Top Event Types</h3>
-                <span style="font-size:0.75rem;color:#9baac4;">Berdasarkan frekuensi</span>
-            </div>
-            <div class="chart-body" id="top-events-body">
+            <div id="top-rooms-body" style="padding:0 24px 16px;">
                 {{-- filled by JS --}}
             </div>
         </div>
@@ -318,11 +302,7 @@ function renderMetrics(data) {
         const prev = data.metrics_prev?.[m.key] ?? 0;
         const diff = val - prev;
         const pct  = prev > 0 ? Math.round((diff / prev) * 100) : 0;
-        const updown = diff >= 0 ? 'change-up' : 'change-down';
-        const arrow  = diff >= 0 ? '↑' : '↓';
-        const changeHtml = prev > 0
-            ? `<div class="metric-change ${updown}">${arrow} ${Math.abs(pct)}% vs periode lalu</div>`
-            : `<div class="metric-change" style="color:#9baac4;">Periode pertama</div>`;
+
         return `
         <div class="metric-card">
             <div class="metric-icon" style="background:${m.bg};">
@@ -332,7 +312,6 @@ function renderMetrics(data) {
             </div>
             <div class="metric-value" data-target="${val}">0</div>
             <div class="metric-label">${m.label}</div>
-            ${changeHtml}
         </div>`;
     }).join('');
     
@@ -425,6 +404,28 @@ function renderDonut(data) {
     total.textContent = `Total: ${sum} reservasi`;
 }
 
+function renderTopRooms(data) {
+    const body  = document.getElementById('top-rooms-body');
+    const rooms = data.room_usage ?? [];
+    if (!rooms.length) { body.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;padding:16px 0;">Tidak ada data.</p>'; return; }
+
+    const RANK_COLORS = ['#D4AF37', '#9baac4', '#cd7f32'];
+    const max = rooms[0].count || 1;
+    const items = rooms.slice(0, 6).map((r, i) => `
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:#f9fafb;border-radius:10px;">
+            <div class="rank-badge" style="background:${RANK_COLORS[i] || '#e5e7eb'};color:${i < 3 ? '#fff' : '#6b7280'};">${i+1}</div>
+            <div style="flex:1;">
+                <div style="font-size:0.875rem;font-weight:600;color:#111827;margin-bottom:5px;">${r.name}</div>
+                <div style="background:#e5e7eb;border-radius:99px;height:7px;overflow:hidden;">
+                    <div style="background:#0A1628;height:7px;border-radius:99px;width:${Math.round((r.count/max)*100)}%;transition:width 0.5s;"></div>
+                </div>
+            </div>
+            <div style="font-size:0.9rem;font-weight:700;color:#0A1628;min-width:32px;text-align:right;">${r.count} <span style="font-size:0.7rem;color:#9baac4;font-weight:400;">reservasi</span></div>
+        </div>`).join('');
+
+    body.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:8px;">${items}</div>`;
+}
+
 function renderRoomUsage(data) {
     const body = document.getElementById('room-usage-body');
     const rooms = data.room_usage ?? [];
@@ -470,7 +471,7 @@ function renderAll() {
     renderMetrics(data);
     renderBarChart(data);
     renderDonut(data);
-    renderRoomUsage(data);
+    renderTopRooms(data);
     renderTopEvents(data);
 
     document.getElementById('detail-table-title').textContent =
@@ -535,14 +536,6 @@ function getDataForPeriod(period, rangeIdx) {
         .slice(0, 6)
         .map(([name, count]) => ({ name, count }));
 
-    const typeMap = {};
-    all.forEach(r => { typeMap[r.event_type] = (typeMap[r.event_type]||0) + 1; });
-    const total = all.length || 1;
-    const event_types = Object.entries(typeMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([type, count]) => ({ type, count, pct: Math.round((count/total)*100) }));
-
     const label = buildLabel(period, rangeIdx, range);
 
     return {
@@ -558,7 +551,6 @@ function getDataForPeriod(period, rangeIdx) {
         status_dist: { approved, pending, rejected, cancelled },
         trend,
         room_usage,
-        event_types,
     };
 }
 
