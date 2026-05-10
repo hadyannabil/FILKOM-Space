@@ -16,11 +16,102 @@
             display: flex;
             flex-direction: column;
             z-index: 40;
+            transition: transform 0.25s ease;
         }
         .admin-content {
             margin-left: 210px;
             min-height: 100vh;
             background: #f4f6fb;
+        }
+
+        /* Mobile overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 35;
+        }
+        .sidebar-overlay.active { display: block; }
+
+        /* Mobile hamburger button */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 8px;
+            color: #0A1628;
+            transition: background 0.15s;
+        }
+        .mobile-menu-btn:hover { background: #f3f4f6; }
+        .mobile-menu-btn svg { width: 22px; height: 22px; }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                z-index: 50;
+            }
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+            .admin-content {
+                margin-left: 0;
+            }
+            .mobile-menu-btn {
+                display: flex;
+            }
+            .topbar {
+                padding: 0 16px !important;
+            }
+            .page-header {
+                padding: 20px 16px 0 !important;
+            }
+            .page-body {
+                padding: 16px !important;
+            }
+            .topbar h1 {
+                font-size: 1.05rem !important;
+            }
+            .topbar-right-date {
+                display: none;
+            }
+            /* Scrollable tables on mobile */
+            .table-scroll-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .table-scroll-wrapper table {
+                min-width: 580px;
+            }
+            /* Dashboard stat grid: 1 col on very small screens */
+            .stat-grid-3 {
+                grid-template-columns: 1fr !important;
+            }
+            /* Filter/search row stack on mobile */
+            .filter-row {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            .filter-row > * { margin-left: 0 !important; }
+            .filter-row input { width: 100% !important; box-sizing: border-box; }
+            /* Table card header stack on mobile */
+            .card-header-row {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+            }
+            .card-header-row input { width: 100% !important; box-sizing: border-box; }
+        }
+        @media (min-width: 480px) and (max-width: 768px) {
+            /* 3-col grid fits from 480px+ on mobile */
+            .stat-grid-3 {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
         }
         .nav-item {
             display: flex;
@@ -71,7 +162,9 @@
 </head>
 <body>
 
-<aside class="admin-sidebar">
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<aside class="admin-sidebar" id="admin-sidebar">
 
     <div style="padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);">
         <div style="display:flex;align-items:center;gap:10px;">
@@ -80,10 +173,13 @@
                     <img src="{{ asset('assets/admin/gedung2.png') }}" style="width:20px;height:20px;object-fit:contain;">
                 </div>
             </div>
-            <div>
+            <div style="flex:1;">
                 <div style="color:#fff;font-weight:700;font-size:0.95rem;line-height:1;">FILKOM Space</div>
                 <div style="color:#7a8ba8;font-size:0.7rem;margin-top:2px;">Admin Dashboard</div>
             </div>
+            <button id="sidebar-close-btn" onclick="closeSidebar()" style="display:none;background:none;border:none;cursor:pointer;color:#9baac4;padding:4px;border-radius:6px;line-height:0;" aria-label="Close sidebar">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
         </div>
     </div>
 
@@ -120,9 +216,14 @@
 <div class="admin-content">
 
     <div class="topbar">
-        <div>
-            <h1 style="font-size:1.35rem;font-weight:700;color:#0A1628;margin:0;">@yield('page-title')</h1>
-            <p style="font-size:0.8rem;color:#9baac4;margin:0;">@yield('page-subtitle')</p>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <button class="mobile-menu-btn" id="sidebar-open-btn" onclick="openSidebar()" aria-label="Open menu">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div>
+                <h1 style="font-size:1.35rem;font-weight:700;color:#0A1628;margin:0;">@yield('page-title')</h1>
+                <p style="font-size:0.8rem;color:#9baac4;margin:0;">@yield('page-subtitle')</p>
+            </div>
         </div>
         <div style="display:flex;align-items:center;gap:18px;">
             <div class="relative" id="admin-notif-wrapper">
@@ -178,7 +279,7 @@
                     });
                 });
             </script>
-            <div style="text-align:right;">
+            <div style="text-align:right;" class="topbar-right-date">
                 <div style="font-size:0.8rem;font-weight:600;color:#374151;">Today</div>
                 <div style="font-size:0.75rem;color:#9baac4;">{{ now()->format('F j, Y') }}</div>
             </div>
@@ -197,6 +298,33 @@
 
     @yield('content')
 </div>
+
+<script>
+    function openSidebar() {
+        document.getElementById('admin-sidebar').classList.add('open');
+        document.getElementById('sidebar-overlay').classList.add('active');
+    }
+    function closeSidebar() {
+        document.getElementById('admin-sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    }
+    document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+
+    // Show close button on mobile
+    function checkMobile() {
+        const closeBtn = document.getElementById('sidebar-close-btn');
+        if (window.innerWidth <= 768) {
+            closeBtn.style.display = 'block';
+        } else {
+            closeBtn.style.display = 'none';
+            // ensure sidebar always visible on desktop
+            document.getElementById('admin-sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+        }
+    }
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+</script>
 
 </body>
 </html>

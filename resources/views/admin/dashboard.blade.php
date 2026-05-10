@@ -7,7 +7,7 @@
 @section('content')
 <div class="page-body">
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:26px;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:26px;" class="stat-grid-3">
 
         <div class="stat-card" style="position:relative;overflow:hidden;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -55,7 +55,7 @@
     </div>
 
     <div class="stat-card" style="padding:0;overflow:hidden;">
-        <div style="padding:20px 24px 16px;border-bottom:1px solid #f0f1f5;display:flex;align-items:center;justify-content:space-between;">
+        <div style="padding:20px 24px 16px;border-bottom:1px solid #f0f1f5;display:flex;align-items:center;justify-content:space-between;" class="card-header-row">
             <h3 style="font-size:1rem;font-weight:700;color:#0A1628;margin:0;">Recent Pending Requests</h3>
             {{-- Live filter with JS DOM --}}
             <input type="text" id="search-input" placeholder="Search event or applicant…"
@@ -63,6 +63,7 @@
                    oninput="filterTable(this.value)">
         </div>
 
+        <div class="table-scroll-wrapper">
         <table>
             <thead>
                 <tr>
@@ -102,7 +103,7 @@
                 @endforelse
             </tbody>
         </table>
-
+        </div>
         @if($requests->hasPages())
         <div style="padding:16px 24px;border-top:1px solid #f0f1f5;display:flex;align-items:center;justify-content:space-between;">
             <span style="font-size:0.8rem;color:#9baac4;">Showing {{ $requests->firstItem() }} to {{ $requests->lastItem() }} of {{ $requests->total() }} results</span>

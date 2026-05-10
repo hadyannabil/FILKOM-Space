@@ -7,7 +7,7 @@
 @section('content')
 <div class="page-body">
 
-    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;" class="filter-row">
         @foreach(['', 'pending', 'approved', 'rejected', 'cancelled'] as $s)
         <a href="{{ route('admin.approvals', $s ? ['status' => $s] : []) }}"
            style="padding:7px 18px;border-radius:20px;font-size:0.8rem;font-weight:600;text-decoration:none;
@@ -26,6 +26,7 @@
     </div>
 
     <div class="stat-card" style="padding:0;overflow:hidden;">
+        <div class="table-scroll-wrapper">
         <table>
             <thead>
                 <tr>
@@ -75,6 +76,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
 
         @if($reservations->hasPages())
         <div style="padding:16px 24px;border-top:1px solid #f0f1f5;display:flex;align-items:center;justify-content:space-between;">

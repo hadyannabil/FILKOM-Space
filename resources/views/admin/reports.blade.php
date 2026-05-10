@@ -65,12 +65,19 @@
     @media (max-width: 900px) {
         .metric-grid { grid-template-columns: repeat(2, 1fr); }
     }
+    @media (max-width: 768px) {
+        .metric-grid { grid-template-columns: repeat(2, 1fr); }
+        .report-tabs { width: 100%; justify-content: space-between; }
+        .report-tab { flex: 1; text-align: center; }
+        .charts-row { grid-template-columns: 1fr !important; }
+        .period-export-row { flex-direction: column; align-items: stretch !important; }
+        .period-export-row > div { width: 100%; }
+    }
 </style>
 
 <div class="page-body">
 
-    {{-- Period & Export Bar --}}
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;" class="period-export-row">
         <div class="report-tabs" id="period-tabs">
             <button class="report-tab active" data-period="weekly"  onclick="setPeriod('weekly',  this)">Weekly</button>
             <button class="report-tab"        data-period="monthly" onclick="setPeriod('monthly', this)">Monthly</button>
@@ -78,7 +85,6 @@
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
             <select class="period-select" id="range-select" onchange="onRangeChange(this.value)">
-                {{-- options filled by JS --}}
             </select>
             <button class="btn-export" onclick="exportCSV()">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:15px;height:15px;"><path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17"/></svg>
@@ -91,15 +97,11 @@
         </div>
     </div>
 
-    {{-- Metric Cards --}}
     <div class="metric-grid" style="margin-bottom:20px;" id="metric-grid">
-        {{-- filled by JS --}}
     </div>
 
-    {{-- Charts Row --}}
-    <div style="display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:20px;">
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:20px;" class="charts-row">
 
-        {{-- Bar Chart: Reservation Trend --}}
         <div class="chart-card">
             <div class="chart-header">
                 <h3 class="chart-title">Tren Reservasi</h3>
@@ -115,7 +117,6 @@
             </div>
         </div>
 
-        {{-- Donut Chart: Status Distribution --}}
         <div class="chart-card">
             <div class="chart-header">
                 <h3 class="chart-title">Status Reservasi</h3>
@@ -124,7 +125,6 @@
                 <div class="donut-wrapper">
                     <svg id="donut-svg" width="120" height="120" viewBox="0 0 120 120" style="flex-shrink:0;transform:rotate(-90deg);">
                         <circle cx="60" cy="60" r="44" fill="none" stroke="#f0f1f5" stroke-width="20"/>
-                        {{-- arcs filled by JS --}}
                     </svg>
                     <div id="donut-legend" style="flex:1;"></div>
                 </div>
@@ -133,7 +133,6 @@
         </div>
     </div>
 
-    {{-- Top Rooms Full Width --}}
     <div style="margin-bottom:20px;">
         <div class="chart-card">
             <div class="chart-header">
@@ -141,12 +140,10 @@
                 <span style="font-size:0.75rem;color:#9baac4;">Ruangan paling sering dipesan</span>
             </div>
             <div id="top-rooms-body" style="padding:0 24px 16px;">
-                {{-- filled by JS --}}
             </div>
         </div>
     </div>
 
-    {{-- Detail Table --}}
     <div class="chart-card" style="margin-bottom:20px;">
         <div class="chart-header">
             <h3 class="chart-title" id="detail-table-title">Detail Reservasi Minggu Ini</h3>
