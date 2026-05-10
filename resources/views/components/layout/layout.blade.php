@@ -11,11 +11,10 @@
     <title>FILKOM Space</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        /* ── Mobile Drawer ── */
         .mobile-drawer {
             position: fixed;
             inset: 0;
-            z-index: 200;
+            z-index: 199;
             pointer-events: none;
         }
         .mobile-drawer.open { pointer-events: all; }
@@ -56,8 +55,7 @@
             margin: 2px 10px;
             transition: background 0.15s, color 0.15s;
         }
-        .drawer-nav-item:hover,
-        .drawer-nav-item.active { background: #f3f4f6; color: #0A1628; }
+        .drawer-nav-item:hover { background: #f3f4f6; color: #0A1628; }
         .drawer-nav-item.active { background: #EFF6FF; color: #0A1628; font-weight: 600; }
         .drawer-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
 
@@ -81,7 +79,6 @@
         }
         .drawer-filter-label input { accent-color: #D4AF37; }
 
-        /* Hamburger button */
         .hamburger-btn {
             display: none;
             align-items: center;
@@ -99,7 +96,6 @@
 
         @media (max-width: 768px) {
             .hamburger-btn { display: flex; }
-            /* Hide desktop aside filter on mobile - drawer handles it */
             .desktop-filter-aside { display: none !important; }
         }
     </style>
@@ -108,7 +104,7 @@
 
     <div class="mobile-drawer" id="mobile-drawer">
         <div class="drawer-overlay" id="drawer-overlay"></div>
-        <div class="drawer-panel" id="drawer-panel">
+        <div class="drawer-panel">
 
             <div style="padding:20px 20px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
                 <div style="display:flex;align-items:center;gap:10px;">
@@ -133,7 +129,6 @@
 
             <div id="drawer-filters-section" style="border-top:1px solid #e5e7eb;padding:12px 0;">
                 <div class="drawer-section-title">Filter Ruangan</div>
-
                 <form action="{{ route('dashboard') }}" method="GET" id="drawer-filter-form">
                     <input type="hidden" name="date" id="df-date">
                     <input type="hidden" name="start_time" id="df-start">
@@ -166,7 +161,7 @@
 
                     <div style="padding:6px 16px 4px;">
                         <a href="{{ route('dashboard') }}"
-                           style="display:block;text-align:center;padding:9px;border-radius:8px;background:#f3f4f6;border:1px solid #e5e7eb;color:#6b7280;font-size:0.8rem;font-weight:600;text-decoration:none;transition:background 0.15s;"
+                           style="display:block;text-align:center;padding:9px;border-radius:8px;background:#f3f4f6;border:1px solid #e5e7eb;color:#6b7280;font-size:0.8rem;font-weight:600;text-decoration:none;"
                            onmouseover="this.style.background='#e5e7eb'"
                            onmouseout="this.style.background='#f3f4f6'">
                             Reset Filter
@@ -174,6 +169,29 @@
                     </div>
                 </form>
             </div>
+
+            @auth
+            <div style="margin-top:auto;padding:14px 16px;border-top:1px solid #e5e7eb;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <div style="width:36px;height:36px;border-radius:50%;background:#e0f2fe;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:#0369a1;flex-shrink:0;">
+                        {{ substr(Auth::user()->name, 0, 1) }}
+                    </div>
+                    <div style="min-width:0;">
+                        <div style="color:#0A1628;font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Auth::user()->name }}</div>
+                        <div style="color:#9ca3af;font-size:0.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Auth::user()->email }}</div>
+                    </div>
+                </div>
+                <form method="POST" action="{{ route('logout') }}" style="margin:0;">
+                    @csrf
+                    <button type="submit" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;border-radius:8px;background:#fff1f2;border:1px solid #fecdd3;color:#ef4444;font-size:0.8rem;font-weight:600;cursor:pointer;"
+                            onmouseover="this.style.background='#ffe4e6'"
+                            onmouseout="this.style.background='#fff1f2'">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Log Out
+                    </button>
+                </form>
+            </div>
+            @endauth
 
         </div>
     </div>
@@ -193,20 +211,26 @@
                     </div>
 
                     <div class="hidden md:flex items-center gap-8 h-16">
+                        
                         <a href="/" class="h-full flex items-center {{ request()->is('/') ? 'text-[#0A1628] font-semibold border-b-2 border-[#D4AF37]' : 'text-gray-500 hover:text-[#0A1628] border-b-2 border-transparent' }}">
                             Home
                         </a>
+                        
                         <a href="/history" class="h-full flex items-center {{ request()->is('history') ? 'text-[#0A1628] font-semibold border-b-2 border-[#D4AF37]' : 'text-gray-500 hover:text-[#0A1628] border-b-2 border-transparent' }}">
                             My Bookings
                         </a>
+
                     </div>
                 </div>
 
                 <div class="flex items-center gap-6">
                     @auth
                         <div class="relative">
+                            
                             <div id="notif-btn" class="cursor-pointer flex items-center justify-center w-12 h-12 rounded-full hover:bg-gray-50 transition-colors">
+                                
                                 <img src="{{ asset($notifAsset) }}" alt="Notifications" class="w-10 h-10 object-contain">
+                                
                                 @if ($unreadCount > 0)
                                     <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-white">
                                         {{ $unreadCount }}
@@ -215,31 +239,42 @@
                             </div>
 
                             <div id="notif-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+                                
                                 <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                                     <h3 class="font-bold text-[#0A1628]">Notifications</h3>
                                     <span class="text-xs text-[#D4AF37] font-medium cursor-pointer hover:underline">Mark all read</span>
                                 </div>
+
                                 <div class="max-h-80 overflow-y-auto">
+                                    
                                     @forelse ($notifications as $notif)
+                                        
                                         <div class="px-4 py-3 border-b border-gray-50 {{ $notif->is_read ? 'bg-white' : 'bg-blue-50/50' }} hover:bg-gray-50 cursor-pointer transition">
                                             <p class="text-sm text-gray-800 font-semibold mb-1">{{ $notif->title }}</p>
                                             <p class="text-xs text-gray-500 mb-2">{{ $notif->message }}</p>
                                             <p class="text-[10px] text-gray-400">{{ $notif->created_at->diffForHumans() }}</p>
                                         </div>
+
                                     @empty
+                                        
                                         <div class="px-4 py-8 text-center flex flex-col items-center justify-center">
                                             <svg class="w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
                                             <p class="text-sm text-gray-500">No new notifications</p>
                                         </div>
+
                                     @endforelse
+
                                 </div>
+
                                 <div class="px-4 py-2 border-t border-gray-100 text-center bg-gray-50">
                                     <a href="#" class="text-xs font-semibold text-gray-500 hover:text-[#0A1628]">View All History</a>
                                 </div>
                             </div>
+
                         </div>
 
-                        <div class="relative flex items-center gap-3 border-l border-[#0A1628] pl-6">
+                        <div class="relative flex items-center gap-3 border-l border-[#0A1628] pl-6 hidden md:flex">
+                            
                             <div id="profile-btn" class="cursor-pointer bg-cyan-200 rounded-full w-10 h-10 flex items-center justify-center hover:ring-2 hover:ring-cyan-300 hover:opacity-90 transition-all z-10">
                                 <span class="text-sm font-bold text-cyan-800">
                                     {{ substr(Auth::user()->name, 0, 1) }}
@@ -247,6 +282,7 @@
                             </div>
 
                             <div id="profile-dropdown" class="hidden absolute right-0 top-12 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50">
+                                
                                 <div class="flex items-center gap-4 px-4 py-4">
                                     <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-cyan-200 flex items-center justify-center">
                                         <span class="text-lg font-bold text-cyan-800">
@@ -258,7 +294,9 @@
                                         <span class="block text-xs text-gray-400 mt-0.5 truncate">{{ Auth::user()->email }}</span>
                                     </div>
                                 </div>
+
                                 <div class="border-t border-gray-200 my-2"></div>
+
                                 <div>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
@@ -268,7 +306,9 @@
                                         </button>
                                     </form>
                                 </div>
+
                             </div>
+                            
                         </div>
                     @endauth
 
@@ -279,6 +319,7 @@
                             </a>
                         </div>
                     @endguest
+
                 </div>
             </div>
         </div>
@@ -287,13 +328,16 @@
     <main>
         {{ $slot }}
     </main>
-
     <script>
-        // ── Drawer ──────────────────────────────
         function openDrawer() {
             document.getElementById('mobile-drawer').classList.add('open');
             document.body.style.overflow = 'hidden';
-            syncDrawerFilters();
+            const params = new URLSearchParams(window.location.search);
+            const df = id => document.getElementById(id);
+            if (df('df-date'))  df('df-date').value  = params.get('date')        || '';
+            if (df('df-start')) df('df-start').value = params.get('start_time')  || '';
+            if (df('df-end'))   df('df-end').value   = params.get('end_time')    || '';
+            if (df('df-room'))  df('df-room').value  = params.get('room_filter') || 'all';
         }
         function closeDrawer() {
             document.getElementById('mobile-drawer').classList.remove('open');
@@ -301,39 +345,9 @@
         }
         document.getElementById('drawer-overlay').addEventListener('click', closeDrawer);
 
-        // Sync hidden filter inputs from the main desktop filter form values in URL
-        function syncDrawerFilters() {
-            const params = new URLSearchParams(window.location.search);
-            const df = id => document.getElementById(id);
-            if (df('df-date'))  df('df-date').value  = params.get('date')       || '';
-            if (df('df-start')) df('df-start').value = params.get('start_time') || '';
-            if (df('df-end'))   df('df-end').value   = params.get('end_time')   || '';
-            if (df('df-room'))  df('df-room').value  = params.get('room_filter')|| 'all';
-        }
-
-        // Hide drawer filters section when not on dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            const isDashboard = window.location.pathname === '/' || window.location.pathname === '/dashboard';
-            const filterSec = document.getElementById('drawer-filters-section');
-            if (filterSec && !isDashboard) filterSec.style.display = 'none';
-        });
-
-        // ── Notif dropdown ──────────────────────
-        const notifBtn  = document.getElementById('notif-btn');
-        const notifDrop = document.getElementById('notif-dropdown');
-        if (notifBtn && notifDrop) {
-            notifBtn.addEventListener('click', e => { e.stopPropagation(); notifDrop.classList.toggle('hidden'); });
-            document.addEventListener('click', () => notifDrop.classList.add('hidden'));
-            notifDrop.addEventListener('click', e => e.stopPropagation());
-        }
-
-        const profileBtn  = document.getElementById('profile-btn');
-        const profileDrop = document.getElementById('profile-dropdown');
-        if (profileBtn && profileDrop) {
-            profileBtn.addEventListener('click', e => { e.stopPropagation(); profileDrop.classList.toggle('hidden'); });
-            document.addEventListener('click', () => profileDrop.classList.add('hidden'));
-            profileDrop.addEventListener('click', e => e.stopPropagation());
-        }
+        var isDashboard = window.location.pathname === '/' || window.location.pathname === '/dashboard';
+        var filterSec = document.getElementById('drawer-filters-section');
+        if (filterSec && !isDashboard) filterSec.style.display = 'none';
     </script>
 
 </body>

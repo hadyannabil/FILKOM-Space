@@ -53,13 +53,7 @@
                 Search Rooms
             </button>
 
-            <div class="md:hidden mt-3 flex gap-3">
-                <button type="button" onclick="openDrawer()"
-                        style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;font-size:0.85rem;font-weight:600;cursor:pointer;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
-                    Filter Gedung &amp; Kapasitas
-                </button>
-            </div>
+
         </form>
     </section>
 
@@ -70,6 +64,7 @@
                 <h3 class="font-bold text-lg mb-4 text-[#0A1628]">Filters</h3>
 
                 <form action="{{ route('dashboard') }}" method="GET" id="filter-form">
+                    {{-- Pertahankan nilai search utama --}}
                     <input type="hidden" name="date" value="{{ $selectedDate }}">
                     <input type="hidden" name="start_time" value="{{ $startTime }}">
                     <input type="hidden" name="end_time" value="{{ $endTime }}">
