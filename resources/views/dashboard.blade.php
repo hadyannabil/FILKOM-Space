@@ -64,7 +64,6 @@
                 <h3 class="font-bold text-lg mb-4 text-[#0A1628]">Filters</h3>
 
                 <form action="{{ route('dashboard') }}" method="GET" id="filter-form">
-                    {{-- Pertahankan nilai search utama --}}
                     <input type="hidden" name="date" value="{{ $selectedDate }}">
                     <input type="hidden" name="start_time" value="{{ $startTime }}">
                     <input type="hidden" name="end_time" value="{{ $endTime }}">
