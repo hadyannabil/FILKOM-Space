@@ -65,8 +65,17 @@ class Reservation extends Model
 
     public static function generateRequestId(): string
     {
-        $year  = now()->year;
-        $count = static::whereYear('created_at', $year)->count() + 1;
-        return sprintf('#REQ-%d-%04d', $year, $count);
+        $year = now()->year;
+        $last = static::whereYear('created_at', $year)
+                    ->orderByDesc('id')
+                    ->value('request_id');
+
+        if ($last && preg_match('/#REQ-\d+-(\d+)/', $last, $m)) {
+            $next = (int) $m[1] + 1;
+        } else {
+            $next = 1;
+        }
+
+        return sprintf('#REQ-%d-%04d', $year, $next);
     }
 }

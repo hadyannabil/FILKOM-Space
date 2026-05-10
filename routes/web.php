@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
-// ─── Guest only ───────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
 
     Route::get('/login', fn () => view('login'))->name('login');
@@ -57,7 +56,6 @@ Route::middleware('guest')->group(function () {
     })->name('register.proses');
 });
 
-// ─── Logout ───────────────────────────────────────────────────────────────────
 Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
@@ -65,7 +63,6 @@ Route::post('/logout', function (Request $request) {
     return redirect('/login');
 })->middleware('auth')->name('logout');
 
-// ─── Admin routes (admin only) ────────────────────────────────────────────────
 Route::middleware(['auth', 'admin.only'])
      ->prefix('admin')
      ->name('admin.')
@@ -79,7 +76,6 @@ Route::middleware(['auth', 'admin.only'])
     Route::get('/reports',                 [AdminController::class, 'reports'])->name('reports');
 });
 
-// ─── User-facing routes (admin diblokir) ─────────────────────────────────────
 Route::middleware('user.only')->group(function () {
 
     Route::get('/', function (Request $request) {
@@ -280,7 +276,6 @@ Route::middleware('user.only')->group(function () {
     });
 });
 
-// ─── JSON fallback helpers ────────────────────────────────────────────────────
 function _readJsonReservations(): array {
     $file = storage_path('app/reservations.json');
     return file_exists($file) ? (json_decode(file_get_contents($file), true) ?? []) : [];
