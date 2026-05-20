@@ -1,4 +1,4 @@
-<x-layout.layout>
+<x-layout>
     <section class="bg-hero-gradient py-16 px-4 sm:px-6 lg:px-8 text-center text-white">
         <h1 class="text-4xl md:text-5xl font-bold mb-4">Find Your Perfect Space</h1>
         <p class="text-gray-300 text-lg mb-10">Search and book rooms across FILKOM campus</p>
@@ -111,7 +111,7 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse ($availableRooms as $room)
-                    <x-dashboard.room-card 
+                    <x-room-card 
                         :title="$room['title']" 
                         :capacity="$room['capacity']" 
                         :image="$room['image']" 
@@ -128,4 +128,4 @@
         </div>
 
     </div>
-</x-layout.layout>
+</x-layout>

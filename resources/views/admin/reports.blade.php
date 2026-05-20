@@ -652,6 +652,8 @@ function exportCSV() {
     const a    = document.createElement('a');
     a.href = url; a.download = `report_${data.label.replace(/\s+/g,'-')}.csv`; a.click();
     URL.revokeObjectURL(url);
+
+    alert("Berhasil diexport")
 }
 
 function printReport() { window.print(); }

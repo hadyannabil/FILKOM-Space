@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
 
-    Route::get('/login', fn () => view('login'))->name('login');
+    Route::get('/login', fn () => view('auth.login'))->name('login');
 
     Route::post('/login', function (Request $request) {
         $credentials = $request->validate([
@@ -33,7 +33,7 @@ Route::middleware('guest')->group(function () {
         ])->onlyInput('email');
     })->name('login.proses');
 
-    Route::get('/register', fn () => view('register'))->name('register');
+    Route::get('/register', fn () => view('auth.register'))->name('register');
 
     Route::post('/register', function (Request $request) {
         $request->validate([
@@ -135,7 +135,7 @@ Route::middleware('user.only')->group(function () {
             $availableRooms = $allRooms;
         }
 
-        return view('dashboard', [
+        return view('user.dashboard', [
             'availableRooms'    => $availableRooms,
             'selectedDate'      => $selectedDate,
             'startTime'         => $startTime,
@@ -149,7 +149,7 @@ Route::middleware('user.only')->group(function () {
     Route::middleware('auth')->group(function () {
 
         Route::get('/reserve/{room}', function (Request $request, $room) {
-            return view('reservation', [
+            return view('user.reservation', [
                 'roomName'     => $room,
                 'selectedDate' => $request->query('date', 'Belum Dipilih'),
                 'selectedTime' => $request->query('time', 'Belum Dipilih'),
@@ -228,7 +228,7 @@ Route::middleware('user.only')->group(function () {
                 $approved = $reservations->where('status', 'approved')->count();
                 $rejected = $reservations->where('status', 'rejected')->count();
 
-                return view('history', compact('reservations', 'total', 'pending', 'approved', 'rejected'));
+                return view('user.history', compact('reservations', 'total', 'pending', 'approved', 'rejected'));
             } catch (\Exception $e) {
                 $reservations = _readJsonReservations();
                 usort($reservations, fn ($a, $b) => strcmp($b['created_at'], $a['created_at']));
@@ -236,7 +236,7 @@ Route::middleware('user.only')->group(function () {
                 $pending  = count(array_filter($reservations, fn ($r) => $r['status'] === 'Pending'));
                 $approved = count(array_filter($reservations, fn ($r) => $r['status'] === 'Approved'));
                 $rejected = count(array_filter($reservations, fn ($r) => $r['status'] === 'Rejected'));
-                return view('history', compact('reservations', 'total', 'pending', 'approved', 'rejected'));
+                return view('user.history', compact('reservations', 'total', 'pending', 'approved', 'rejected'));
             }
         })->name('history');
 
