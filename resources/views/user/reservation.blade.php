@@ -62,7 +62,8 @@
                         <p class="text-gray-700 font-medium mb-1">Drag and drop your PDF file here</p>
                         <p class="text-gray-400 text-sm mb-6">or click to browse files</p>
                         
-                        <input type="file" name="approval_letter" accept=".pdf" required class="hidden" id="file-upload">
+                        <input type="file" name="approval_letter" accept=".pdf" required class="hidden" id="file-upload"
+                            onchange="validateFile(this)">
                         
                         <div class="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium text-gray-600">
                             <img src="{{ asset('assets/reservation/pdf.webp') }}" alt="PDF Icon" class="w-6 h-6 object-contain">
@@ -89,5 +90,35 @@
         </p>
 
     </div>
+
+    <script>
+        function validateFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const isPdf = file.type === 'application/pdf' || file.name.endsWith('.pdf');
+            const isUnder10MB = file.size <= 10 * 1024 * 1024;
+
+            if (!isPdf) {
+                alert('File yang diupload harus berformat PDF.');
+                input.value = '';
+                return;
+            }
+
+            if (!isUnder10MB) {
+                alert('Ukuran file tidak boleh melebihi 10MB.');
+                input.value = '';
+            }
+        }
+
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const input = document.getElementById('file-upload');
+
+            if (!input.files.length) {
+                e.preventDefault();
+                input.reportValidity();
+            }
+        });
+    </script>
 
 </x-layout>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -106,10 +107,19 @@ class AdminController extends Controller
 
     public function approve(Reservation $reservation)
     {
+        $reservation->load('room');
+
         $reservation->update([
             'status'      => 'approved',
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
+        ]);
+
+        Notification::create([
+            'user_id' => $reservation->user_id,
+            'title'   => 'Reservasi Disetujui ✓',
+            'message' => 'Reservasi ruangan ' . ($reservation->room->name ?? '-') . ' untuk acara "' . $reservation->event_name . '" telah disetujui.',
+            'is_read' => false,
         ]);
 
         return redirect()->route('admin.approvals')
@@ -122,11 +132,21 @@ class AdminController extends Controller
             'rejection_reason' => ['nullable', 'string', 'max:1000'],
         ]);
 
+        $reservation->load('room');
+
         $reservation->update([
             'status'           => 'rejected',
             'rejection_reason' => $request->rejection_reason,
             'reviewed_by'      => Auth::id(),
             'reviewed_at'      => now(),
+        ]);
+
+        Notification::create([
+            'user_id' => $reservation->user_id,
+            'title'   => 'Reservasi Ditolak',
+            'message' => 'Reservasi ruangan ' . ($reservation->room->name ?? '-') . ' untuk acara "' . $reservation->event_name . '" ditolak.'
+                       . ($request->rejection_reason ? ' Alasan: ' . $request->rejection_reason : ''),
+            'is_read' => false,
         ]);
 
         return redirect()->route('admin.approvals')

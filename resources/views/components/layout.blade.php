@@ -232,8 +232,12 @@
                                 <img src="{{ asset($notifAsset) }}" alt="Notifications" class="w-10 h-10 object-contain">
                                 
                                 @if ($unreadCount > 0)
-                                    <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-white">
+                                    <span id="notif-badge" class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-white">
                                         {{ $unreadCount }}
+                                    </span>
+                                @else
+                                    <span id="notif-badge" class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-white" style="display:none;">
+                                        0
                                     </span>
                                 @endif
                             </div>
@@ -242,14 +246,16 @@
                                 
                                 <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                                     <h3 class="font-bold text-[#0A1628]">Notifications</h3>
-                                    <span class="text-xs text-[#D4AF37] font-medium cursor-pointer hover:underline">Mark all read</span>
+                                    <span onclick="markAllRead()" class="text-xs text-[#D4AF37] font-medium cursor-pointer hover:underline">Mark all read</span>
                                 </div>
 
-                                <div class="max-h-80 overflow-y-auto">
+                                <div class="max-h-80 overflow-y-auto" id="notif-list">
                                     
                                     @forelse ($notifications as $notif)
                                         
-                                        <div class="px-4 py-3 border-b border-gray-50 {{ $notif->is_read ? 'bg-white' : 'bg-blue-50/50' }} hover:bg-gray-50 cursor-pointer transition">
+                                        <div id="notif-item-{{ $notif->id }}"
+                                             onclick="markRead({{ $notif->id }}, this)"
+                                             class="px-4 py-3 border-b border-gray-50 {{ $notif->is_read ? 'bg-white' : 'bg-blue-50/50' }} hover:bg-gray-50 cursor-pointer transition">
                                             <p class="text-sm text-gray-800 font-semibold mb-1">{{ $notif->title }}</p>
                                             <p class="text-xs text-gray-500 mb-2">{{ $notif->message }}</p>
                                             <p class="text-[10px] text-gray-400">{{ $notif->created_at->diffForHumans() }}</p>
@@ -257,7 +263,7 @@
 
                                     @empty
                                         
-                                        <div class="px-4 py-8 text-center flex flex-col items-center justify-center">
+                                        <div class="px-4 py-8 text-center flex flex-col items-center justify-center" id="notif-empty">
                                             <svg class="w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
                                             <p class="text-sm text-gray-500">No new notifications</p>
                                         </div>
@@ -267,7 +273,7 @@
                                 </div>
 
                                 <div class="px-4 py-2 border-t border-gray-100 text-center bg-gray-50">
-                                    <a href="#" class="text-xs font-semibold text-gray-500 hover:text-[#0A1628]">View All History</a>
+                                    <a href="{{ route('history') }}" class="text-xs font-semibold text-gray-500 hover:text-[#0A1628]">View All History</a>
                                 </div>
                             </div>
 
@@ -348,6 +354,64 @@
         var isDashboard = window.location.pathname === '/' || window.location.pathname === '/dashboard';
         var filterSec = document.getElementById('drawer-filters-section');
         if (filterSec && !isDashboard) filterSec.style.display = 'none';
+
+        // ── Notifikasi ──────────────────────────────────────────────
+        const csrfToken = '{{ csrf_token() }}';
+
+        async function markRead(id, el) {
+            // Update UI langsung tanpa tunggu response
+            el.classList.remove('bg-blue-50/50');
+            el.classList.add('bg-white');
+
+            // Kurangi badge
+            const badge = document.getElementById('notif-badge');
+            if (badge) {
+                const current = parseInt(badge.textContent) || 0;
+                if (current <= 1) {
+                    badge.style.display = 'none';
+                } else {
+                    badge.textContent = current - 1;
+                }
+            }
+
+            try {
+                await fetch(`/notifications/${id}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                });
+            } catch (err) {
+                console.error('Mark read error:', err);
+            }
+        }
+
+        async function markAllRead() {
+            // Update semua item UI
+            document.querySelectorAll('#notif-list > div').forEach(el => {
+                el.classList.remove('bg-blue-50/50');
+                el.classList.add('bg-white');
+            });
+
+            // Sembunyikan badge
+            const badge = document.getElementById('notif-badge');
+            if (badge) badge.style.display = 'none';
+
+            try {
+                await fetch('/notifications/read-all', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                });
+            } catch (err) {
+                console.error('Mark all read error:', err);
+            }
+        }
     </script>
 
 </body>

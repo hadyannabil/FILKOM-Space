@@ -286,6 +286,27 @@ Route::middleware('user.only')->group(function () {
                 return response()->json(['success' => false]);
             }
         })->name('reserve.cancel');
+
+        Route::post('/notifications/{id}/read', function ($id) {
+            $notif = \App\Models\Notification::where('id', $id)
+                ->where('user_id', Auth::id())
+                ->first();
+
+            if ($notif) {
+                $notif->update(['is_read' => true]);
+                return response()->json(['success' => true]);
+            }
+
+            return response()->json(['success' => false], 404);
+        })->name('notifications.read');
+
+        Route::post('/notifications/read-all', function () {
+            \App\Models\Notification::where('user_id', Auth::id())
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
+
+            return response()->json(['success' => true]);
+        })->name('notifications.read-all');
     });
 });
 
