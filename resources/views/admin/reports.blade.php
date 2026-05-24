@@ -352,8 +352,10 @@ function renderDonut(data) {
     const sum    = keys.reduce((s, k) => s + (dist[k]||0), 0);
 
     if (sum === 0) {
+        svg.querySelectorAll('.donut-arc').forEach(e => e.remove());
         svg.querySelector('circle').setAttribute('stroke', '#f0f1f5');
         legend.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">Belum ada data.</p>';
+        total.textContent = '';
         return;
     }
 
@@ -470,7 +472,11 @@ function renderAll() {
 function getDataForPeriod(period, rangeIdx) {
     const now = new Date();
 
-    function isoDate(d) { return d.toISOString().split('T')[0]; }
+    // BUGFIX: toISOString() converts to UTC — in UTC+7, local midnight becomes previous day UTC.
+    // Always use local date parts to avoid off-by-one timezone errors.
+    function isoDate(d) {
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
 
     function dateRange() {
         if (period === 'weekly') {
@@ -561,11 +567,15 @@ function buildTrend(items, period, range) {
         const start = new Date(range.start);
         const daysInMonth = new Date(start.getFullYear(), start.getMonth()+1, 0).getDate();
         const weeks = Math.ceil(daysInMonth / 7);
+        // BUGFIX: use local date parts to avoid timezone shift in toISOString()
+        function localDate(d) {
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
         return Array.from({ length: weeks }, (_, i) => {
             const wStart = new Date(start); wStart.setDate(1 + i*7);
-            const wEnd   = new Date(start); wEnd.setDate(Math.min(daysInMonth, (i+1)*7));
-            const ws = wStart.toISOString().split('T')[0];
-            const we = wEnd.toISOString().split('T')[0];
+            const wEnd   = new Date(start); wEnd.setDate(Math.min(daysInMonth, 1 + i*7 + 6));
+            const ws = localDate(wStart);
+            const we = localDate(wEnd);
             const week = items.filter(r => r.date >= ws && r.date <= we);
             return {
                 label: `W${i+1}`,
@@ -625,7 +635,9 @@ function exportCSV() {
     const data = getDataForPeriod(currentPeriod, rangeIdx);
     const range = (() => {
         const now = new Date();
-        function isoDate(d) { return d.toISOString().split('T')[0]; }
+        function isoDate(d) {
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
         if (currentPeriod === 'weekly') {
             const monday = new Date(now); monday.setDate(now.getDate() - now.getDay() + 1 - rangeIdx * 7); monday.setHours(0,0,0,0);
             const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
