@@ -75,6 +75,27 @@ Route::middleware(['auth', 'admin.only'])
     Route::post('/approvals/{reservation}/approve', [AdminController::class, 'approve'])->name('approval.approve');
     Route::post('/approvals/{reservation}/reject',  [AdminController::class, 'reject'])->name('approval.reject');
     Route::get('/reports',                 [AdminController::class, 'reports'])->name('reports');
+
+    Route::post('/notifications/{id}/read', function ($id) {
+        $notif = \App\Models\Notification::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if ($notif) {
+            $notif->update(['is_read' => true]);
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
+    })->name('notifications.read');
+
+    Route::post('/notifications/read-all', function () {
+        \App\Models\Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
+    })->name('notifications.read-all');
 });
 
 Route::middleware('user.only')->group(function () {
@@ -208,6 +229,18 @@ Route::middleware('user.only')->group(function () {
                     'approval_letter'  => $filePath,
                     'status'           => 'pending',
                 ]);
+
+                // Kirim notifikasi ke semua admin
+                $admins = \App\Models\User::where('role', 'admin')->get();
+                foreach ($admins as $admin) {
+                    \App\Models\Notification::create([
+                        'user_id' => $admin->id,
+                        'title'   => 'Reservasi Baru Masuk',
+                        'message' => Auth::user()->name . ' mengajukan reservasi "' . $request->event_name . '" di ' . $request->room . ' pada ' . $request->selected_date . '.',
+                        'is_read' => false,
+                    ]);
+                }
+
             } catch (\Exception $e) {
                 $reservations   = _readJsonReservations();
                 $reservations[] = [

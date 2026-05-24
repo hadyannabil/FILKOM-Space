@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') – FILKOM Space</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -153,7 +154,6 @@
         .page-header { padding: 28px 32px 0; }
         .page-body   { padding: 24px 32px; }
 
-
         .avatar { width: 36px; height: 36px; border-radius: 50%; background: #D4AF37; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: #0A1628; flex-shrink: 0; }
     </style>
 </head>
@@ -236,12 +236,14 @@
                 <div id="admin-notif-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
                     <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                         <h3 class="font-bold text-[#0A1628]">Notifications</h3>
-                        <span class="text-xs text-[#D4AF37] font-medium cursor-pointer hover:underline">Mark all read</span>
+                        <span onclick="markAllRead()" class="text-xs text-[#D4AF37] font-medium cursor-pointer hover:underline">Mark all read</span>
                     </div>
 
                     <div class="max-h-80 overflow-y-auto">
                         @forelse ($notifications as $notif)
-                            <div class="px-4 py-3 border-b border-gray-50 {{ $notif->is_read ? 'bg-white' : 'bg-blue-50/50' }} hover:bg-gray-50 cursor-pointer transition">
+                            <div onclick="markRead({{ $notif->id }}, this)"
+                                 data-id="{{ $notif->id }}"
+                                 class="px-4 py-3 border-b border-gray-50 {{ $notif->is_read ? 'bg-white' : 'bg-blue-50/50' }} hover:bg-gray-50 cursor-pointer transition">
                                 <p class="text-sm text-gray-800 font-semibold mb-1">{{ $notif->title }}</p>
                                 <p class="text-xs text-gray-500 mb-2">{{ $notif->message }}</p>
                                 <p class="text-[10px] text-gray-400">{{ $notif->created_at->diffForHumans() }}</p>
@@ -253,29 +255,9 @@
                             </div>
                         @endforelse
                     </div>
-
-                    <div class="px-4 py-2 border-t border-gray-100 text-center bg-gray-50">
-                        <a href="#" class="text-xs font-semibold text-gray-500 hover:text-[#0A1628]">View All History</a>
-                    </div>
                 </div>
             </div>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const btn  = document.getElementById('admin-notif-btn');
-                    const drop = document.getElementById('admin-notif-dropdown');
-                    btn.addEventListener('click', function (e) {
-                        e.stopPropagation();
-                        drop.classList.toggle('hidden');
-                    });
-                    document.addEventListener('click', function () {
-                        drop.classList.add('hidden');
-                    });
-                    drop.addEventListener('click', function (e) {
-                        e.stopPropagation();
-                    });
-                });
-            </script>
             <div style="text-align:right;" class="topbar-right-date">
                 <div style="font-size:0.8rem;font-weight:600;color:#374151;">Today</div>
                 <div style="font-size:0.75rem;color:#9baac4;">{{ now()->format('F j, Y') }}</div>
@@ -307,20 +289,76 @@
     }
     document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
 
-    // Show close button on mobile
     function checkMobile() {
         const closeBtn = document.getElementById('sidebar-close-btn');
         if (window.innerWidth <= 768) {
             closeBtn.style.display = 'block';
         } else {
             closeBtn.style.display = 'none';
-            // ensure sidebar always visible on desktop
             document.getElementById('admin-sidebar').classList.remove('open');
             document.getElementById('sidebar-overlay').classList.remove('active');
         }
     }
     checkMobile();
     window.addEventListener('resize', checkMobile);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const btn  = document.getElementById('admin-notif-btn');
+        const drop = document.getElementById('admin-notif-dropdown');
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            drop.classList.toggle('hidden');
+        });
+        document.addEventListener('click', function () {
+            drop.classList.add('hidden');
+        });
+        drop.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    });
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    function markRead(id, el) {
+        el.classList.remove('bg-blue-50/50');
+        el.classList.add('bg-white');
+
+        const badge = document.querySelector('#admin-notif-btn span');
+        if (badge) {
+            const current = parseInt(badge.textContent);
+            if (current <= 1) {
+                badge.remove();
+            } else {
+                badge.textContent = current - 1;
+            }
+        }
+
+        fetch(`/admin/notifications/${id}/read`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            }
+        }).catch(console.error);
+    }
+
+    function markAllRead() {
+        document.querySelectorAll('#admin-notif-dropdown [data-id]').forEach(el => {
+            el.classList.remove('bg-blue-50/50');
+            el.classList.add('bg-white');
+        });
+
+        const badge = document.querySelector('#admin-notif-btn span');
+        if (badge) badge.remove();
+
+        fetch('/admin/notifications/read-all', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            }
+        }).catch(console.error);
+    }
 </script>
 
 </body>
