@@ -9,19 +9,20 @@
 
     <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;" class="filter-row">
         @foreach(['', 'pending', 'approved', 'rejected', 'cancelled'] as $s)
-        <a href="{{ route('admin.approvals', $s ? ['status' => $s] : []) }}"
-           style="padding:7px 18px;border-radius:20px;font-size:0.8rem;font-weight:600;text-decoration:none;
+        <button onclick="setStatusFilter('{{ $s }}')"
+           id="tab-{{ $s ?: 'all' }}"
+           style="padding:7px 18px;border-radius:20px;font-size:0.8rem;font-weight:600;text-decoration:none;cursor:pointer;
                   {{ request('status', '') === $s
                        ? 'background:#0A1628;color:#fff;border:1.5px solid #0A1628;'
                        : 'background:#fff;color:#6b7280;border:1.5px solid #e5e7eb;' }}">
             {{ $s ? ucfirst($s) : 'All' }}
-        </a>
+        </button>
         @endforeach
 
         <div style="margin-left:auto;">
             <input type="text" id="search-approvals" placeholder="Search…"
                    style="border:1px solid #e5e7eb;border-radius:8px;padding:7px 14px;font-size:0.8rem;color:#374151;outline:none;width:200px;"
-                   oninput="filterApprovals(this.value)">
+                   oninput="liveSearchApprovals(this.value)">
         </div>
     </div>
 
@@ -72,12 +73,13 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" style="text-align:center;padding:40px;color:#9baac4;">No reservations found.</td></tr>
+                <tr id="empty-row"><td colspan="7" style="text-align:center;padding:40px;color:#9baac4;">No reservations found.</td></tr>
                 @endforelse
             </tbody>
         </table>
         </div>
 
+        <div id="pagination-wrapper">
         @if($reservations->hasPages())
         <div style="padding:16px 24px;border-top:1px solid #f0f1f5;display:flex;align-items:center;justify-content:space-between;">
             <span style="font-size:0.8rem;color:#9baac4;">Showing {{ $reservations->firstItem() }} – {{ $reservations->lastItem() }} of {{ $reservations->total() }} results</span>
@@ -91,19 +93,91 @@
             </div>
         </div>
         @endif
+        </div>
     </div>
 </div>
 
 <script>
-function filterApprovals(q) {
-    q = q.toLowerCase().trim();
-    document.querySelectorAll('#approvals-tbody .approval-row').forEach(row => {
-        const matches = !q
-            || row.dataset.event.includes(q)
-            || row.dataset.applicant.includes(q)
-            || row.dataset.id.includes(q);
-        row.style.display = matches ? '' : 'none';
-    });
-}
+    const searchEndpoint = "{{ route('admin.approvals.search') }}";
+    let   activeStatus   = "{{ request('status', '') }}";
+    let   searchTimer    = null;
+
+    function setStatusFilter(status) {
+        activeStatus = status;
+
+        // Update tampilan active tab
+        ['', 'pending', 'approved', 'rejected', 'cancelled'].forEach(s => {
+            const btn = document.getElementById('tab-' + (s || 'all'));
+            if (!btn) return;
+            if (s === status) {
+                btn.style.background = '#0A1628';
+                btn.style.color      = '#fff';
+                btn.style.border     = '1.5px solid #0A1628';
+            } else {
+                btn.style.background = '#fff';
+                btn.style.color      = '#6b7280';
+                btn.style.border     = '1.5px solid #e5e7eb';
+            }
+        });
+
+        // Fetch dengan status baru + keyword yang sedang diketik
+        const q = document.getElementById('search-approvals').value.trim();
+        fetchApprovals(q);
+    }
+
+    function liveSearchApprovals(q) {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => fetchApprovals(q.trim()), 300);
+    }
+
+    async function fetchApprovals(q) {
+        const tbody      = document.getElementById('approvals-tbody');
+        const pagination = document.getElementById('pagination-wrapper');
+
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#9baac4;">Mencari...</td></tr>`;
+
+        try {
+            const params = new URLSearchParams({ q, status: activeStatus });
+            const res    = await fetch(`${searchEndpoint}?${params}`, {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (!res.ok) throw new Error('Request failed');
+
+            const json = await res.json();
+
+            pagination.style.display = q === '' ? '' : 'none';
+
+            if (json.data.length === 0) {
+                tbody.innerHTML = q
+                    ? `<tr><td colspan="7" style="text-align:center;padding:40px;color:#9baac4;">Tidak ada hasil untuk "<strong>${q}</strong>".</td></tr>`
+                    : `<tr><td colspan="7" style="text-align:center;padding:40px;color:#9baac4;">No reservations found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = json.data.map(r => `
+                <tr class="approval-row">
+                    <td style="font-family:monospace;font-size:0.8rem;color:#6b7280;">${r.request_id}</td>
+                    <td>
+                        <div style="font-weight:600;color:#111827;">${r.event_name}</div>
+                        <div style="font-size:0.75rem;color:#9baac4;">${r.event_type}</div>
+                    </td>
+                    <td>${r.pic_name}</td>
+                    <td style="font-weight:500;">${r.room}</td>
+                    <td>${r.date}</td>
+                    <td>
+                        <span class="${r.badge_class}" style="padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;">
+                            ${r.badge_label}
+                        </span>
+                    </td>
+                    <td><a href="${r.detail_url}" class="review-btn">Detail</a></td>
+                </tr>
+            `).join('');
+
+        } catch (err) {
+            console.error('Search error:', err);
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#ef4444;">Terjadi kesalahan. Coba lagi.</td></tr>`;
+        }
+    }
 </script>
 @endsection

@@ -69,8 +69,9 @@ Route::middleware(['auth', 'admin.only'])
      ->group(function () {
 
     Route::get('/dashboard',               [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/approvals',               [AdminController::class, 'approvals'])->name('approvals');
-    Route::get('/approvals/{reservation}', [AdminController::class, 'approvalDetail'])->name('approval.detail');
+    Route::get('/approvals',                      [AdminController::class, 'approvals'])->name('approvals');
+    Route::get('/approvals/search',               [AdminController::class, 'searchApprovals'])->name('approvals.search');
+    Route::get('/approvals/{reservation}',        [AdminController::class, 'approvalDetail'])->name('approval.detail');
     Route::post('/approvals/{reservation}/approve', [AdminController::class, 'approve'])->name('approval.approve');
     Route::post('/approvals/{reservation}/reject',  [AdminController::class, 'reject'])->name('approval.reject');
     Route::get('/reports',                 [AdminController::class, 'reports'])->name('reports');
@@ -85,9 +86,18 @@ Route::middleware('user.only')->group(function () {
         $selectedTime      = $startTime . ' - ' . $endTime;
         $selectedBuildings = $request->query('buildings', []);
         $selectedCapacity  = $request->query('capacity', '');
+        $roomFilter        = $request->query('room_filter', 'all');
 
         try {
+            // Ambil semua room aktif untuk dropdown (tanpa filter building/capacity)
+            $allRoomsForDropdown = Room::active()->orderBy('name')->pluck('name')->toArray();
+
             $query = Room::active();
+
+            // Filter by specific room name
+            if ($roomFilter !== 'all' && $roomFilter !== '') {
+                $query->where('name', $roomFilter);
+            }
 
             // Filter by building
             if (!empty($selectedBuildings)) {
@@ -107,6 +117,7 @@ Route::middleware('user.only')->group(function () {
                 'slug'     => $r->name,
             ])->toArray();
         } catch (\Exception $e) {
+            $allRoomsForDropdown = [];
             $allRooms = [
                 ['title' => 'Room F3.1',            'capacity' => '40',  'image' => 'ruang-kelas.webp',          'slug' => 'Room F3.1'],
                 ['title' => 'Algorithm Auditorium', 'capacity' => '150', 'image' => 'auditorium-algoritma.webp', 'slug' => 'Algorithm Auditorium'],
@@ -136,13 +147,15 @@ Route::middleware('user.only')->group(function () {
         }
 
         return view('user.dashboard', [
-            'availableRooms'    => $availableRooms,
-            'selectedDate'      => $selectedDate,
-            'startTime'         => $startTime,
-            'endTime'           => $endTime,
-            'selectedTime'      => $selectedTime,
-            'selectedBuildings' => $selectedBuildings,
-            'selectedCapacity'  => $selectedCapacity,
+            'availableRooms'      => $availableRooms,
+            'allRoomsForDropdown' => $allRoomsForDropdown,
+            'selectedDate'        => $selectedDate,
+            'startTime'           => $startTime,
+            'endTime'             => $endTime,
+            'selectedTime'        => $selectedTime,
+            'selectedBuildings'   => $selectedBuildings,
+            'selectedCapacity'    => $selectedCapacity,
+            'roomFilter'          => $roomFilter,
         ]);
     })->name('dashboard');
 

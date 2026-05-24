@@ -39,11 +39,11 @@
                     <label class="block text-sm font-medium text-gray-600 mb-1">Rooms</label>
                     <select name="room_filter" class="w-full border-gray-200 rounded-lg px-4 py-2 border">
                         <option value="all">All rooms</option>
-                        @for ($floor = 2; $floor <= 4; $floor++)
-                            @for ($room = 1; $room <= 5; $room++)
-                                <option value="F{{ $floor }}.{{ $room }}">Room F{{ $floor }}.{{ $room }}</option>
-                            @endfor
-                        @endfor
+                        @foreach ($allRoomsForDropdown as $roomName)
+                            <option value="{{ $roomName }}" {{ $roomFilter === $roomName ? 'selected' : '' }}>
+                                {{ $roomName }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -67,7 +67,7 @@
                     <input type="hidden" name="date" value="{{ $selectedDate }}">
                     <input type="hidden" name="start_time" value="{{ $startTime }}">
                     <input type="hidden" name="end_time" value="{{ $endTime }}">
-                    <input type="hidden" name="room_filter" value="{{ request('room_filter', 'all') }}">
+                    <input type="hidden" name="room_filter" value="{{ $roomFilter }}">
 
                     <div class="mb-6">
                         <h4 class="text-sm font-semibold text-gray-700 mb-2">Building Location</h4>

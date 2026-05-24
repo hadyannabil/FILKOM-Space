@@ -49,6 +49,55 @@ class AdminController extends Controller
         return view('admin.approvals', compact('reservations'));
     }
 
+    public function searchApprovals(Request $request)
+    {
+        $q      = $request->query('q', '');
+        $status = $request->query('status', '');
+
+        $query = Reservation::with(['room'])
+            ->orderByDesc('created_at');
+
+        if ($status !== '' && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if ($q !== '') {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('event_name',  'like', "%{$q}%")
+                    ->orWhere('pic_name',  'like', "%{$q}%")
+                    ->orWhere('request_id','like', "%{$q}%");
+            });
+        }
+
+        $reservations = $query->limit(50)->get();
+
+        $statusMap = [
+            'pending'   => ['label' => 'Pending',   'class' => 'badge-pending'],
+            'approved'  => ['label' => 'Approved',  'class' => 'badge-approved'],
+            'rejected'  => ['label' => 'Rejected',  'class' => 'badge-rejected'],
+            'cancelled' => ['label' => 'Cancelled', 'class' => 'badge-cancelled'],
+        ];
+
+        $data = $reservations->map(function ($r) use ($statusMap) {
+            $s = $statusMap[$r->status] ?? ['label' => ucfirst($r->status), 'class' => 'badge-cancelled'];
+            return [
+                'id'         => $r->id,
+                'request_id' => $r->request_id,
+                'event_name' => $r->event_name,
+                'event_type' => $r->event_type ?? '',
+                'pic_name'   => $r->pic_name,
+                'room'       => $r->room->name ?? '—',
+                'date'       => \Carbon\Carbon::parse($r->reservation_date)->format('M j, Y'),
+                'status'     => $r->status,
+                'badge_label'=> $s['label'],
+                'badge_class'=> $s['class'],
+                'detail_url' => route('admin.approval.detail', $r->id),
+            ];
+        });
+
+        return response()->json(['data' => $data]);
+    }
+
     public function approvalDetail(Reservation $reservation)
     {
         $reservation->load(['user', 'room', 'reviewer']);
