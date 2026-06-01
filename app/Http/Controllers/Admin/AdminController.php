@@ -22,8 +22,8 @@ class AdminController extends Controller
                             ->count();
         $busyRoomIds = Reservation::whereIn('status', ['approved', 'pending'])
                             ->where('reservation_date', today())
-                            ->whereRaw('start_time <= CURTIME()')
-                            ->whereRaw('end_time >= CURTIME()')
+                            ->whereRaw('start_time <= CURRENT_TIME()')
+                            ->whereRaw('end_time >= CURRENT_TIME()')
                             ->pluck('room_id');
         $availableRooms = Room::active()->whereNotIn('id', $busyRoomIds)->count();
 
