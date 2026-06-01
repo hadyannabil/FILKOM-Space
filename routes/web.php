@@ -110,22 +110,18 @@ Route::middleware('user.only')->group(function () {
         $roomFilter        = $request->query('room_filter', 'all');
 
         try {
-            // Ambil semua room aktif untuk dropdown (tanpa filter building/capacity)
             $allRoomsForDropdown = Room::active()->orderBy('name')->pluck('name')->toArray();
 
             $query = Room::active();
 
-            // Filter by specific room name
             if ($roomFilter !== 'all' && $roomFilter !== '') {
                 $query->where('name', $roomFilter);
             }
 
-            // Filter by building
             if (!empty($selectedBuildings)) {
                 $query->whereIn('building', $selectedBuildings);
             }
 
-            // Filter by capacity range
             if ($selectedCapacity !== '') {
                 [$min, $max] = explode('-', $selectedCapacity);
                 $query->whereBetween('capacity', [(int) $min, (int) $max]);
@@ -147,7 +143,6 @@ Route::middleware('user.only')->group(function () {
         }
 
         try {
-            // Deteksi overlap waktu: bentrok jika start_time < $endTime DAN end_time > $startTime
             $bookedRoomIds = Reservation::where('reservation_date', $selectedDate)
                 ->whereNotIn('status', ['rejected', 'cancelled'])
                 ->where('start_time', '<', $endTime)
@@ -155,7 +150,6 @@ Route::middleware('user.only')->group(function () {
                 ->pluck('room_id')
                 ->toArray();
 
-            // Build map name->id sekali saja, hindari N+1 query
             $roomNames = array_column($allRooms, 'title');
             $roomIdMap = Room::whereIn('name', $roomNames)->pluck('id', 'name')->toArray();
 
@@ -230,7 +224,6 @@ Route::middleware('user.only')->group(function () {
                     'status'           => 'pending',
                 ]);
 
-                // Kirim notifikasi ke semua admin
                 $admins = \App\Models\User::where('role', 'admin')->get();
                 foreach ($admins as $admin) {
                     \App\Models\Notification::create([
@@ -343,11 +336,13 @@ Route::middleware('user.only')->group(function () {
     });
 });
 
-function _readJsonReservations(): array {
+if (!function_exists("_readJsonReservations")) { function _readJsonReservations(): array {
     $file = storage_path('app/reservations.json');
     return file_exists($file) ? (json_decode(file_get_contents($file), true) ?? []) : [];
 }
+}
 
-function _writeJsonReservations(array $data): void {
+if (!function_exists("_writeJsonReservations")) { function _writeJsonReservations(array $data): void {
     file_put_contents(storage_path('app/reservations.json'), json_encode($data, JSON_PRETTY_PRINT));
+}
 }
