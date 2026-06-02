@@ -73,12 +73,11 @@
                         @enderror
                     </div>
 
-                    <div class="flex items-center justify-between text-sm mb-5">
+                    <div class="flex items-center text-sm mb-5">
                         <label class="flex items-center gap-2">
                             <input type="checkbox" name="remember">
                             <span>Remember me</span>
                         </label>
-                        <a href="#" class="text-[#0A1628] font-semibold">Forgot password?</a>
                     </div>
 
                     <button type="submit" class="btn-primary w-full">
