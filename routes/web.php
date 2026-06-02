@@ -105,6 +105,8 @@ Route::middleware('user.only')->group(function () {
         $startTime         = $request->query('start_time', '08:00');
         $endTime           = $request->query('end_time', '10:00');
         $selectedTime      = $startTime . ' - ' . $endTime;
+
+        $isPastTime = ($selectedDate === now()->toDateString()) && ($startTime < now()->format('H:i'));
         $selectedBuildings = $request->query('buildings', []);
         $selectedCapacity  = $request->query('capacity', '');
         $roomFilter        = $request->query('room_filter', 'all');
@@ -171,6 +173,7 @@ Route::middleware('user.only')->group(function () {
             'selectedBuildings'   => $selectedBuildings,
             'selectedCapacity'    => $selectedCapacity,
             'roomFilter'          => $roomFilter,
+            'isPastTime'          => $isPastTime,
         ]);
     })->name('dashboard');
 
@@ -190,7 +193,7 @@ Route::middleware('user.only')->group(function () {
                 'pic_name'        => ['required', 'string', 'max:255'],
                 'attendees'       => ['required', 'string', 'max:100'],
                 'room'            => ['required', 'string'],
-                'selected_date'   => ['required', 'string'],
+                'selected_date'   => ['required', 'date', 'date_format:Y-m-d', 'after_or_equal:today'],
                 'selected_time'   => ['required', 'string'],
                 'approval_letter' => ['required', 'mimes:pdf', 'max:10240'],
             ]);

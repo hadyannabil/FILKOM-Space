@@ -7,7 +7,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div class="text-left">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Date</label>
-                    <input type="date" name="date" value="{{ $selectedDate }}" class="w-full border-gray-200 rounded-lg focus:ring-[#D4AF37] focus:border-[#D4AF37] px-4 py-2 border">
+                    <input type="date" name="date" value="{{ $selectedDate }}" min="{{ date('Y-m-d') }}" class="w-full border-gray-200 rounded-lg focus:ring-[#D4AF37] focus:border-[#D4AF37] px-4 py-2 border">
                 </div>
                 <div class="text-left">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Start Time</label>
@@ -52,6 +52,14 @@
                 <img src="{{ asset('assets/dashboard/search.webp') }}" alt="Search Icon" class="w-5.5 h-5.5 object-contain inline-block mr-2"> 
                 Search Rooms
             </button>
+
+            @foreach ($selectedBuildings as $building)
+                <input type="hidden" name="buildings[]" value="{{ $building }}">
+            @endforeach
+
+            @if ($selectedCapacity)
+                <input type="hidden" name="capacity" value="{{ $selectedCapacity }}">
+            @endif
 
 
         </form>
@@ -107,24 +115,30 @@
 
         <div class="flex-1">
             <h2 class="text-2xl font-bold text-[#0A1628] mb-2">Available Rooms</h2>
-            <p class="text-gray-500 mb-6">{{ count($availableRooms) }} rooms available for your selected time</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @forelse ($availableRooms as $room)
-                    <x-room-card 
-                        :title="$room['title']" 
-                        :capacity="$room['capacity']" 
-                        :image="$room['image']" 
-                        :slug="$room['slug']"
-                        :selectedDate="$selectedDate"
-                        :selectedTime="$selectedTime"
-                    />
-                @empty
-                    <div class="col-span-full text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                        <p class="text-gray-500">Maaf, tidak ada ruangan yang tersedia di jam tersebut. Silakan cari jam lain.</p>
-                    </div>
-                @endforelse
-            </div>
+
+            @if ($isPastTime)
+                <div class="col-span-full text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                    <p class="text-gray-500">Waktu yang kamu pilih sudah berlalu. Silakan pilih jam yang akan datang.</p>
+                </div>
+            @else
+                <p class="text-gray-500 mb-6">{{ count($availableRooms) }} rooms available for your selected time</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @forelse ($availableRooms as $room)
+                        <x-room-card 
+                            :title="$room['title']" 
+                            :capacity="$room['capacity']" 
+                            :image="$room['image']" 
+                            :slug="$room['slug']"
+                            :selectedDate="$selectedDate"
+                            :selectedTime="$selectedTime"
+                        />
+                    @empty
+                        <div class="col-span-full text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <p class="text-gray-500">Maaf, tidak ada ruangan yang tersedia di jam tersebut. Silakan cari jam lain.</p>
+                        </div>
+                    @endforelse
+                </div>
+            @endif
         </div>
 
     </div>
