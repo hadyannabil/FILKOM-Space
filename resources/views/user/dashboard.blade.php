@@ -118,7 +118,7 @@
 
             @if ($isPastTime)
                 <div class="col-span-full text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                    <p class="text-gray-500">Waktu yang kamu pilih sudah berlalu. Silakan pilih jam yang akan datang.</p>
+                    <p class="text-gray-500">Maaf, tidak ada ruangan yang tersedia di jam tersebut. Silahkan cari jam lain.</p>
                 </div>
             @else
                 <p class="text-gray-500 mb-6">{{ count($availableRooms) }} rooms available for your selected time</p>
