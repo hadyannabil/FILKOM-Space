@@ -7,23 +7,32 @@
 @section('content')
 <div class="page-body">
 
-    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;" class="filter-row">
-        @foreach(['', 'pending', 'approved', 'rejected', 'cancelled'] as $s)
-        <button onclick="setStatusFilter('{{ $s }}')"
-           id="tab-{{ $s ?: 'all' }}"
-           style="padding:7px 18px;border-radius:20px;font-size:0.8rem;font-weight:600;text-decoration:none;cursor:pointer;
-                  {{ request('status', '') === $s
-                       ? 'background:#0A1628;color:#fff;border:1.5px solid #0A1628;'
-                       : 'background:#fff;color:#6b7280;border:1.5px solid #e5e7eb;' }}">
-            {{ $s ? ucfirst($s) : 'All' }}
-        </button>
-        @endforeach
+    {{-- Filter Tabs + Search --}}
+    <div style="margin-bottom:20px;">
 
-        <div style="margin-left:auto;">
+        {{-- Tab strip: scrollable horizontally on mobile --}}
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:12px;">
+            <div style="display:inline-flex;gap:8px;min-width:max-content;padding-bottom:2px;">
+                @foreach(['', 'pending', 'approved', 'rejected', 'cancelled'] as $s)
+                <button onclick="setStatusFilter('{{ $s }}')"
+                   id="tab-{{ $s ?: 'all' }}"
+                   style="padding:7px 18px;border-radius:20px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s ease;
+                          {{ request('status', '') === $s
+                               ? 'background:#0A1628;color:#fff;border:1.5px solid #0A1628;'
+                               : 'background:#fff;color:#6b7280;border:1.5px solid #e5e7eb;' }}">
+                    {{ $s ? ucfirst($s) : 'All' }}
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Search bar below tabs, full width --}}
+        <div>
             <input type="text" id="search-approvals" placeholder="Search…"
-                   style="border:1px solid #e5e7eb;border-radius:8px;padding:7px 14px;font-size:0.8rem;color:#374151;outline:none;width:200px;"
+                   style="border:1px solid #e5e7eb;border-radius:8px;padding:7px 14px;font-size:0.8rem;color:#374151;outline:none;width:100%;box-sizing:border-box;"
                    oninput="liveSearchApprovals(this.value)">
         </div>
+
     </div>
 
     <div class="stat-card" style="padding:0;overflow:hidden;">
