@@ -135,7 +135,7 @@ class AdminController extends Controller
 
         Notification::create([
             'user_id' => $reservation->user_id,
-            'title'   => 'Reservasi Disetujui ✓',
+            'title'   => 'Reservasi Disetujui',
             'message' => 'Reservasi ruangan ' . ($reservation->room->name ?? '-') . ' untuk acara "' . $reservation->event_name . '" telah disetujui.',
             'is_read' => false,
         ]);
