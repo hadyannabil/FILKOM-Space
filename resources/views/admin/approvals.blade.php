@@ -83,12 +83,49 @@
         @if($reservations->hasPages())
         <div style="padding:16px 24px;border-top:1px solid #f0f1f5;display:flex;align-items:center;justify-content:space-between;">
             <span style="font-size:0.8rem;color:#9baac4;">Showing {{ $reservations->firstItem() }} – {{ $reservations->lastItem() }} of {{ $reservations->total() }} results</span>
-            <div style="display:flex;gap:6px;">
-                @if(!$reservations->onFirstPage())
-                    <a href="{{ $reservations->previousPageUrl() }}" style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-size:0.8rem;text-decoration:none;">Previous</a>
+            <div style="display:flex;gap:6px;align-items:center;">
+                {{-- Prev --}}
+                @if($reservations->onFirstPage())
+                    <span style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#f9fafb;color:#d1d5db;font-size:0.8rem;cursor:default;">Prev</span>
+                @else
+                    <a href="{{ $reservations->previousPageUrl() }}" style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-size:0.8rem;text-decoration:none;">Prev</a>
                 @endif
+
+                {{-- Page numbers --}}
+                @php
+                    $current   = $reservations->currentPage();
+                    $last      = $reservations->lastPage();
+                    $start     = max(1, $current - 2);
+                    $end       = min($last, $current + 2);
+                @endphp
+
+                @if($start > 1)
+                    <a href="{{ $reservations->url(1) }}" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-size:0.8rem;text-decoration:none;">1</a>
+                    @if($start > 2)
+                        <span style="color:#9baac4;font-size:0.8rem;">…</span>
+                    @endif
+                @endif
+
+                @for($p = $start; $p <= $end; $p++)
+                    @if($p == $current)
+                        <span style="padding:6px 10px;border:1px solid #0A1628;border-radius:7px;background:#0A1628;color:#fff;font-size:0.8rem;font-weight:600;">{{ $p }}</span>
+                    @else
+                        <a href="{{ $reservations->url($p) }}" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-size:0.8rem;text-decoration:none;">{{ $p }}</a>
+                    @endif
+                @endfor
+
+                @if($end < $last)
+                    @if($end < $last - 1)
+                        <span style="color:#9baac4;font-size:0.8rem;">…</span>
+                    @endif
+                    <a href="{{ $reservations->url($last) }}" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-size:0.8rem;text-decoration:none;">{{ $last }}</a>
+                @endif
+
+                {{-- Next --}}
                 @if($reservations->hasMorePages())
-                    <a href="{{ $reservations->nextPageUrl() }}" style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#0A1628;color:#fff;font-size:0.8rem;text-decoration:none;">Next</a>
+                    <a href="{{ $reservations->nextPageUrl() }}" style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-size:0.8rem;text-decoration:none;">Next</a>
+                @else
+                    <span style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#f9fafb;color:#d1d5db;font-size:0.8rem;cursor:default;">Next</span>
                 @endif
             </div>
         </div>

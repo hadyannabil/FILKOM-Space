@@ -29,7 +29,9 @@ class AdminController extends Controller
 
         $requests = Reservation::with(['user', 'room'])
                         ->where('status', 'pending')
-                        ->orderByDesc('created_at')
+                        ->where('reservation_date', '>=', today())
+                        ->orderBy('reservation_date')
+                        ->orderBy('start_time')
                         ->paginate(7);
 
         return view('admin.dashboard', compact(
