@@ -136,69 +136,73 @@
 
 <script>
     const searchEndpoint = "{{ route('admin.approvals.search') }}";
-    let   activeStatus   = "{{ request('status', '') }}";
+    let   activeStatus   = new URLSearchParams(window.location.search).get('status') || '';
     let   searchTimer    = null;
+    let   ajaxPage       = 1;
+    let   lastQ          = '';
+
+    // Isi search input dari URL param supaya tidak hilang setelah redirect
+    const currentQ = new URLSearchParams(window.location.search).get('q') || '';
+    if (currentQ) {
+        document.getElementById('search-approvals').value = currentQ;
+        lastQ = currentQ;
+        fetchApprovals(currentQ, 1);
+    }
 
     function setStatusFilter(status) {
-        activeStatus = status;
-
-        // Update tampilan active tab
-        ['', 'pending', 'approved', 'rejected', 'cancelled'].forEach(s => {
-            const btn = document.getElementById('tab-' + (s || 'all'));
-            if (!btn) return;
-            if (s === status) {
-                btn.style.background = '#0A1628';
-                btn.style.color      = '#fff';
-                btn.style.border     = '1.5px solid #0A1628';
-            } else {
-                btn.style.background = '#fff';
-                btn.style.color      = '#6b7280';
-                btn.style.border     = '1.5px solid #e5e7eb';
-            }
-        });
-
-        // Fetch dengan status baru + keyword yang sedang diketik
-        const q = document.getElementById('search-approvals').value.trim();
-        fetchApprovals(q);
+        const url = new URL(window.location.href);
+        url.searchParams.delete('page');
+        url.searchParams.delete('q');
+        if (status === '') {
+            url.searchParams.delete('status');
+        } else {
+            url.searchParams.set('status', status);
+        }
+        window.location.href = url.toString();
     }
 
     function liveSearchApprovals(q) {
         clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => fetchApprovals(q.trim()), 300);
+        searchTimer = setTimeout(() => {
+            lastQ  = q.trim();
+            ajaxPage = 1;
+            if (lastQ === '') {
+                // Kosongkan search → reload halaman normal
+                const url = new URL(window.location.href);
+                url.searchParams.delete('q');
+                url.searchParams.delete('page');
+                window.location.href = url.toString();
+            } else {
+                fetchApprovals(lastQ, 1);
+            }
+        }, 300);
     }
 
-    async function fetchApprovals(q) {
+    async function fetchApprovals(q, page) {
         const tbody      = document.getElementById('approvals-tbody');
         const pagination = document.getElementById('pagination-wrapper');
 
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#9baac4;">Mencari...</td></tr>`;
 
         try {
-            const params = new URLSearchParams({ q, status: activeStatus });
+            const params = new URLSearchParams({ q, status: activeStatus, page });
             const res    = await fetch(`${searchEndpoint}?${params}`, {
                 headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
             });
 
             if (!res.ok) throw new Error('Request failed');
-
             const json = await res.json();
 
-            pagination.style.display = q === '' ? '' : 'none';
-
             if (json.data.length === 0) {
-                tbody.innerHTML = q
-                    ? `<tr><td colspan="7" style="text-align:center;padding:40px;color:#9baac4;">Tidak ada hasil untuk "<strong>${q}</strong>".</td></tr>`
-                    : `<tr><td colspan="7" style="text-align:center;padding:40px;color:#9baac4;">No reservations found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#9baac4;">Tidak ada hasil untuk "<strong>${q}</strong>".</td></tr>`;
+                pagination.innerHTML = '';
                 return;
             }
 
             tbody.innerHTML = json.data.map(r => `
                 <tr class="approval-row">
                     <td style="font-family:monospace;font-size:0.8rem;color:#6b7280;">${r.request_id}</td>
-                    <td>
-                        <div style="font-weight:600;color:#111827;">${r.event_name}</div>
-                        <div style="font-size:0.75rem;color:#9baac4;">${r.event_type}</div>
-                    </td>
+                    <td><div style="font-weight:600;color:#111827;">${r.event_name}</div></td>
                     <td>${r.pic_name}</td>
                     <td style="font-weight:500;">${r.room}</td>
                     <td>${r.date}</td>
@@ -211,10 +215,46 @@
                 </tr>
             `).join('');
 
+            // Render pagination AJAX
+            renderAjaxPagination(json, q);
+
         } catch (err) {
             console.error('Search error:', err);
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#ef4444;">Terjadi kesalahan. Coba lagi.</td></tr>`;
         }
+    }
+
+    function renderAjaxPagination(json, q) {
+        const wrapper = document.getElementById('pagination-wrapper');
+        if (json.last_page <= 1) { wrapper.innerHTML = ''; return; }
+
+        const cur  = json.current_page;
+        const last = json.last_page;
+        const from = json.from ?? 0;
+        const to   = json.to   ?? 0;
+
+        const btn = (p, label, active = false, disabled = false) => {
+            if (disabled) return `<span style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#f9fafb;color:#d1d5db;font-size:0.8rem;cursor:default;">${label}</span>`;
+            if (active)   return `<span style="padding:6px 10px;border:1px solid #0A1628;border-radius:7px;background:#0A1628;color:#fff;font-size:0.8rem;font-weight:600;">${label}</span>`;
+            return `<button onclick="fetchApprovals('${q}', ${p})" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-size:0.8rem;cursor:pointer;">${label}</button>`;
+        };
+
+        let pages = '';
+        const start = Math.max(1, cur - 2);
+        const end   = Math.min(last, cur + 2);
+        if (start > 1) { pages += btn(1, '1'); if (start > 2) pages += `<span style="color:#9baac4;font-size:0.8rem;">…</span>`; }
+        for (let p = start; p <= end; p++) pages += btn(p, p, p === cur);
+        if (end < last) { if (end < last - 1) pages += `<span style="color:#9baac4;font-size:0.8rem;">…</span>`; pages += btn(last, last); }
+
+        wrapper.innerHTML = `
+            <div style="padding:16px 24px;border-top:1px solid #f0f1f5;display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:0.8rem;color:#9baac4;">Showing ${from}–${to} of ${json.total} results</span>
+                <div style="display:flex;gap:6px;align-items:center;">
+                    ${btn(cur - 1, 'Prev', false, cur === 1)}
+                    ${pages}
+                    ${btn(cur + 1, 'Next', false, cur === last)}
+                </div>
+            </div>`;
     }
 </script>
 @endsection

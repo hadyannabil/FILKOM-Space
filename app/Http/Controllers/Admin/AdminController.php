@@ -47,7 +47,16 @@ class AdminController extends Controller
             $query->where('status', $request->status);
         }
 
-        $reservations = $query->paginate(10);
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('event_name',  'like', "%{$q}%")
+                    ->orWhere('pic_name',  'like', "%{$q}%")
+                    ->orWhere('request_id','like', "%{$q}%");
+            });
+        }
+
+        $reservations = $query->paginate(10)->appends($request->query());
 
         return view('admin.approvals', compact('reservations'));
     }
@@ -56,6 +65,7 @@ class AdminController extends Controller
     {
         $q      = $request->query('q', '');
         $status = $request->query('status', '');
+        $page   = max(1, (int) $request->query('page', 1));
 
         $query = Reservation::with(['room'])
             ->orderByDesc('created_at');
@@ -72,7 +82,7 @@ class AdminController extends Controller
             });
         }
 
-        $reservations = $query->limit(50)->get();
+        $reservations = $query->paginate(10, ['*'], 'page', $page);
 
         $statusMap = [
             'pending'   => ['label' => 'Pending',   'class' => 'badge-pending'],
@@ -87,7 +97,6 @@ class AdminController extends Controller
                 'id'         => $r->id,
                 'request_id' => $r->request_id,
                 'event_name' => $r->event_name,
-                'event_type' => $r->event_type ?? '',
                 'pic_name'   => $r->pic_name,
                 'room'       => $r->room->name ?? '—',
                 'date'       => \Carbon\Carbon::parse($r->reservation_date)->format('M j, Y'),
@@ -98,7 +107,14 @@ class AdminController extends Controller
             ];
         });
 
-        return response()->json(['data' => $data]);
+        return response()->json([
+            'data'          => $data,
+            'total'         => $reservations->total(),
+            'current_page'  => $reservations->currentPage(),
+            'last_page'     => $reservations->lastPage(),
+            'from'          => $reservations->firstItem(),
+            'to'            => $reservations->lastItem(),
+        ]);
     }
 
     public function approvalDetail(Reservation $reservation)
@@ -157,10 +173,6 @@ class AdminController extends Controller
 
     public function reports(Request $request)
     {
-        $reservations = Reservation::with(['room', 'user'])
-            ->orderByDesc('reservation_date')
-            ->paginate(10);
-
         $chartData = Reservation::with('room')
             ->orderBy('reservation_date')
             ->get()
@@ -181,6 +193,6 @@ class AdminController extends Controller
             ->values()
             ->toArray();
 
-        return view('admin.reports', compact('reservations', 'chartData'));
+        return view('admin.reports', compact('chartData'));
     }
 }

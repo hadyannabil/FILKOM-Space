@@ -154,72 +154,10 @@
                     </tr>
                 </thead>
                 <tbody id="detail-table-body">
-                    @forelse($reservations as $r)
-                    <tr class="detail-row"
-                        data-event="{{ strtolower($r->event_name) }}"
-                        data-pic="{{ strtolower($r->pic_name) }}">
-                        <td>
-                            <div style="font-weight:600;color:#111827;">{{ $r->event_name }}</div>
-                            <div style="font-size:0.75rem;color:#9baac4;">{{ $r->event_type }}</div>
-                        </td>
-                        <td>
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <div class="avatar" style="width:28px;height:28px;font-size:0.7rem;">{{ substr($r->pic_name, 0, 1) }}</div>
-                                <span style="font-size:0.875rem;">{{ $r->pic_name }}</span>
-                            </div>
-                        </td>
-                        <td style="font-weight:500;font-size:0.875rem;">{{ $r->room->name ?? '—' }}</td>
-                        <td>
-                            <div style="font-size:0.875rem;font-weight:500;">{{ \Carbon\Carbon::parse($r->reservation_date)->format('d M Y') }}</div>
-                            <div style="font-size:0.73rem;color:#9baac4;">{{ substr($r->start_time,0,5) }}–{{ substr($r->end_time,0,5) }}</div>
-                        </td>
-                        <td>
-                            @php
-                                $badgeClass = match($r->status) {
-                                    'approved'  => 'badge-approved',
-                                    'rejected'  => 'badge-rejected',
-                                    'cancelled' => 'badge-cancelled',
-                                    default     => 'badge-pending',
-                                };
-                                $badgeLabel = match($r->status) {
-                                    'approved'  => 'Disetujui',
-                                    'rejected'  => 'Ditolak',
-                                    'cancelled' => 'Dibatalkan',
-                                    default     => 'Pending',
-                                };
-                            @endphp
-                            <span class="{{ $badgeClass }}" style="padding:3px 10px;border-radius:6px;font-size:0.73rem;font-weight:600;">
-                                {{ $badgeLabel }}
-                            </span>
-                        </td>
-                        <td style="text-align:right;font-weight:600;color:#374151;">{{ $r->attendees }}</td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="6" style="text-align:center;padding:40px;color:#9baac4;">Tidak ada data reservasi.</td></tr>
-                    @endforelse
                 </tbody>
             </table>
         </div>
-        @if($reservations->hasPages())
-        <div style="padding:16px 24px;border-top:1px solid #f0f1f5;display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:0.8rem;color:#9baac4;">Showing {{ $reservations->firstItem() }} – {{ $reservations->lastItem() }} of {{ $reservations->total() }}</span>
-            <div style="display:flex;gap:6px;">
-                @if($reservations->onFirstPage())
-                    <button disabled style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#f9fafb;color:#d1d5db;font-size:0.8rem;cursor:not-allowed;">Prev</button>
-                @else
-                    <a href="{{ $reservations->previousPageUrl() }}" style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-size:0.8rem;text-decoration:none;">Prev</a>
-                @endif
-                @foreach($reservations->getUrlRange(1, $reservations->lastPage()) as $pg => $url)
-                    <a href="{{ $url }}" style="padding:6px 12px;border:1px solid {{ $pg == $reservations->currentPage() ? '#0A1628' : '#e5e7eb' }};border-radius:7px;background:{{ $pg == $reservations->currentPage() ? '#0A1628' : '#fff' }};color:{{ $pg == $reservations->currentPage() ? '#fff' : '#374151' }};font-size:0.8rem;text-decoration:none;">{{ $pg }}</a>
-                @endforeach
-                @if($reservations->hasMorePages())
-                    <a href="{{ $reservations->nextPageUrl() }}" style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-size:0.8rem;text-decoration:none;">Next</a>
-                @else
-                    <button disabled style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:#f9fafb;color:#d1d5db;font-size:0.8rem;cursor:not-allowed;">Next</button>
-                @endif
-            </div>
-        </div>
-        @endif
+        <div id="detail-pagination" style="padding:16px 24px;border-top:1px solid #f0f1f5;display:flex;align-items:center;justify-content:space-between;"></div>
     </div>
 
 </div>
@@ -237,6 +175,7 @@ function setPeriod(period, btn) {
     document.querySelectorAll('.report-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     populateRangeSelect(period);
+    document.getElementById('range-select').value = '0';
     renderAll();
 }
 
@@ -417,6 +356,7 @@ function renderTopRooms(data) {
 
 function renderRoomUsage(data) {
     const body = document.getElementById('room-usage-body');
+    if (!body) return;
     const rooms = data.room_usage ?? [];
     if (!rooms.length) { body.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">Tidak ada data.</p>'; return; }
 
@@ -438,6 +378,7 @@ function renderRoomUsage(data) {
 
 function renderTopEvents(data) {
     const body  = document.getElementById('top-events-body');
+    if (!body) return;  // elemen tidak ada di halaman ini
     const types = data.event_types ?? [];
     if (!types.length) { body.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">Tidak ada data.</p>'; return; }
 
@@ -454,7 +395,7 @@ function renderTopEvents(data) {
 }
 
 function renderAll() {
-    const rangeIdx = parseInt(document.getElementById('range-select').value || 0, 10);
+    const rangeIdx = Math.max(0, parseInt(document.getElementById('range-select').value ?? '0', 10) || 0);
     const data = getDataForPeriod(currentPeriod, rangeIdx);
 
     renderMetrics(data);
@@ -463,10 +404,16 @@ function renderAll() {
     renderTopRooms(data);
     renderTopEvents(data);
 
+    // Judul tabel: "Detail Reservasi Bulanan – Juni 2026" dll
+    const periodLabel = currentPeriod === 'weekly'  ? 'Mingguan' :
+                        currentPeriod === 'monthly' ? 'Bulanan'  : 'Tahunan';
     document.getElementById('detail-table-title').textContent =
-        currentPeriod === 'weekly'  ? 'Detail Reservasi – ' + data.label :
-        currentPeriod === 'monthly' ? 'Detail Reservasi – ' + data.label :
-        'Detail Reservasi – ' + data.label;
+        `Detail Reservasi ${periodLabel} – ${data.label}`;
+
+    // Reset search & render tabel pakai rows yang sudah difilter dari getDataForPeriod
+    const searchEl = document.getElementById('table-search');
+    if (searchEl) searchEl.value = '';
+    renderDetailTable(data.rows);
 }
 
 function getDataForPeriod(period, rangeIdx) {
@@ -533,6 +480,8 @@ function getDataForPeriod(period, rangeIdx) {
 
     return {
         label,
+        range,
+        rows: all,
         metrics: { total: all.length, approved, rejected, pending, cancelled },
         metrics_prev: {
             total:     prev.length,
@@ -613,21 +562,120 @@ function buildLabel(period, rangeIdx, range) {
     return 'Tahun ' + (new Date().getFullYear() - rangeIdx);
 }
 
+// ─── DETAIL TABLE (client-side, period-aware, search across all pages) ───────
+const DETAIL_PAGE_SIZE = 10;
+let detailCurrentPage = 1;
+let detailFilteredRows = [];
+
 function filterDetailTable(q) {
-    q = q.toLowerCase().trim();
-    let vis = 0;
-    document.querySelectorAll('#detail-table-body .detail-row').forEach(row => {
-        const match = !q || row.dataset.event.includes(q) || row.dataset.pic.includes(q);
-        row.style.display = match ? '' : 'none';
-        if (match) vis++;
-    });
-    let emp = document.getElementById('detail-empty');
-    if (!vis && !emp) {
-        emp = document.createElement('tr');
-        emp.id = 'detail-empty';
-        emp.innerHTML = `<td colspan="6" style="text-align:center;padding:40px;color:#9baac4;">Tidak ada hasil untuk "<strong>${q}</strong>".</td>`;
-        document.getElementById('detail-table-body').appendChild(emp);
-    } else if (vis && emp) { emp.remove(); }
+    // Reset ke halaman 1 setiap kali search berubah
+    detailCurrentPage = 1;
+    renderDetailTable();
+}
+
+function renderDetailTable(rows) {
+    const q = (document.getElementById('table-search')?.value || '').toLowerCase().trim();
+
+    // Kalau rows diberikan (dari renderAll), simpan sebagai dataset aktif
+    if (rows !== undefined) {
+        detailFilteredRows = rows;
+        detailCurrentPage = 1;
+    }
+
+    // Filter berdasarkan search query — mencakup SEMUA data, bukan hanya halaman ini
+    const filtered = q
+        ? detailFilteredRows.filter(r =>
+            r.event_name.toLowerCase().includes(q) ||
+            r.pic_name.toLowerCase().includes(q))
+        : detailFilteredRows;
+
+    const total     = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / DETAIL_PAGE_SIZE));
+    detailCurrentPage = Math.min(detailCurrentPage, totalPages);
+
+    const start  = (detailCurrentPage - 1) * DETAIL_PAGE_SIZE;
+    const paged  = filtered.slice(start, start + DETAIL_PAGE_SIZE);
+
+    const STATUS_BADGE = {
+        approved:  { cls: 'badge-approved',  label: 'Disetujui'  },
+        rejected:  { cls: 'badge-rejected',  label: 'Ditolak'    },
+        cancelled: { cls: 'badge-cancelled', label: 'Dibatalkan' },
+        pending:   { cls: 'badge-pending',   label: 'Pending'    },
+    };
+
+    const MONTHS_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    function fmtDate(ds) {
+        const d = new Date(ds + 'T00:00:00');
+        return `${String(d.getDate()).padStart(2,'0')} ${MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    const tbody = document.getElementById('detail-table-body');
+    if (!paged.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:#9baac4;">${
+            q ? `Tidak ada hasil untuk "<strong>${q}</strong>".` : 'Tidak ada data reservasi.'
+        }</td></tr>`;
+    } else {
+        tbody.innerHTML = paged.map(r => {
+            const badge = STATUS_BADGE[r.status] || STATUS_BADGE.pending;
+            return `
+            <tr class="detail-row" data-event="${r.event_name.toLowerCase()}" data-pic="${r.pic_name.toLowerCase()}">
+                <td>
+                    <div style="font-weight:600;color:#111827;">${r.event_name}</div>
+                </td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div class="avatar" style="width:28px;height:28px;font-size:0.7rem;">${r.pic_name.charAt(0)}</div>
+                        <span style="font-size:0.875rem;">${r.pic_name}</span>
+                    </div>
+                </td>
+                <td style="font-weight:500;font-size:0.875rem;">${r.room || '—'}</td>
+                <td>
+                    <div style="font-size:0.875rem;font-weight:500;">${fmtDate(r.date)}</div>
+                    <div style="font-size:0.73rem;color:#9baac4;">${(r.start_time||'').slice(0,5)}–${(r.end_time||'').slice(0,5)}</div>
+                </td>
+                <td>
+                    <span class="${badge.cls}" style="padding:3px 10px;border-radius:6px;font-size:0.73rem;font-weight:600;">
+                        ${badge.label}
+                    </span>
+                </td>
+                <td style="text-align:right;font-weight:600;color:#374151;">${r.attendees ?? 0}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // Render pagination
+    const paginationEl = document.getElementById('detail-pagination');
+    if (total <= DETAIL_PAGE_SIZE) {
+        paginationEl.innerHTML = '';
+        return;
+    }
+
+    const from = total > 0 ? start + 1 : 0;
+    const to   = Math.min(start + DETAIL_PAGE_SIZE, total);
+
+    let pageButtons = '';
+    for (let p = 1; p <= totalPages; p++) {
+        const active = p === detailCurrentPage;
+        pageButtons += `<button onclick="goDetailPage(${p})" style="padding:6px 12px;border:1px solid ${active ? '#0A1628' : '#e5e7eb'};border-radius:7px;background:${active ? '#0A1628' : '#fff'};color:${active ? '#fff' : '#374151'};font-size:0.8rem;cursor:pointer;">${p}</button>`;
+    }
+
+    paginationEl.innerHTML = `
+        <span style="font-size:0.8rem;color:#9baac4;">Showing ${from}–${to} of ${total}</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+            <button onclick="goDetailPage(${detailCurrentPage - 1})" ${detailCurrentPage === 1 ? 'disabled' : ''} style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:${detailCurrentPage===1?'#f9fafb':'#fff'};color:${detailCurrentPage===1?'#d1d5db':'#374151'};font-size:0.8rem;cursor:${detailCurrentPage===1?'not-allowed':'pointer'};">Prev</button>
+            ${pageButtons}
+            <button onclick="goDetailPage(${detailCurrentPage + 1})" ${detailCurrentPage === totalPages ? 'disabled' : ''} style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:7px;background:${detailCurrentPage===totalPages?'#f9fafb':'#fff'};color:${detailCurrentPage===totalPages?'#d1d5db':'#374151'};font-size:0.8rem;cursor:${detailCurrentPage===totalPages?'not-allowed':'pointer'};">Next</button>
+        </div>`;
+}
+
+function goDetailPage(p) {
+    const q = (document.getElementById('table-search')?.value || '').toLowerCase().trim();
+    const filtered = q
+        ? detailFilteredRows.filter(r => r.event_name.toLowerCase().includes(q) || r.pic_name.toLowerCase().includes(q))
+        : detailFilteredRows;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / DETAIL_PAGE_SIZE));
+    detailCurrentPage = Math.max(1, Math.min(p, totalPages));
+    renderDetailTable();
 }
 
 function exportCSV() {
