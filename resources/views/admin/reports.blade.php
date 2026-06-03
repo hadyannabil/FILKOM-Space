@@ -94,10 +94,10 @@
 
         <div class="chart-card">
             <div class="chart-header">
-                <h3 class="chart-title">Tren Reservasi</h3>
+                <h3 class="chart-title">Reservation Trend</h3>
                 <div style="display:flex;gap:12px;align-items:center;">
-                    <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:#374151;"><span style="width:10px;height:10px;background:#0A1628;border-radius:3px;display:inline-block;"></span>Disetujui</span>
-                    <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:#374151;"><span style="width:10px;height:10px;background:#ef4444;border-radius:3px;display:inline-block;"></span>Ditolak</span>
+                    <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:#374151;"><span style="width:10px;height:10px;background:#0A1628;border-radius:3px;display:inline-block;"></span>Approved</span>
+                    <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:#374151;"><span style="width:10px;height:10px;background:#ef4444;border-radius:3px;display:inline-block;"></span>Rejected</span>
                     <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:#374151;"><span style="width:10px;height:10px;background:#D4AF37;border-radius:3px;display:inline-block;"></span>Pending</span>
                 </div>
             </div>
@@ -109,7 +109,7 @@
 
         <div class="chart-card">
             <div class="chart-header">
-                <h3 class="chart-title">Status Reservasi</h3>
+                <h3 class="chart-title">Reservation Status</h3>
             </div>
             <div class="chart-body">
                 <div class="donut-wrapper">
@@ -127,7 +127,7 @@
         <div class="chart-card">
             <div class="chart-header">
                 <h3 class="chart-title">Top Rooms</h3>
-                <span style="font-size:0.75rem;color:#9baac4;">Ruangan paling sering dipesan</span>
+                <span style="font-size:0.75rem;color:#9baac4;">Most frequently booked rooms</span>
             </div>
             <div id="top-rooms-body" style="padding:0 24px 16px;">
             </div>
@@ -136,8 +136,8 @@
 
     <div class="chart-card" style="margin-bottom:20px;">
         <div class="chart-header">
-            <h3 class="chart-title" id="detail-table-title">Detail Reservasi Minggu Ini</h3>
-            <input type="text" id="table-search" placeholder="Cari event atau pemohon…"
+            <h3 class="chart-title" id="detail-table-title">This Week's Reservation Details</h3>
+            <input type="text" id="table-search" placeholder="Search event or requester…"
                    style="border:1px solid #e5e7eb;border-radius:8px;padding:7px 14px;font-size:0.8rem;color:#374151;outline:none;width:220px;"
                    oninput="filterDetailTable(this.value)">
         </div>
@@ -146,11 +146,11 @@
                 <thead>
                     <tr>
                         <th>Event</th>
-                        <th>Pemohon</th>
-                        <th>Ruangan</th>
-                        <th>Tanggal</th>
+                        <th>Requester</th>
+                        <th>Room</th>
+                        <th>Date</th>
                         <th>Status</th>
-                        <th style="text-align:right;">Peserta</th>
+                        <th style="text-align:right;">Attendees</th>
                     </tr>
                 </thead>
                 <tbody id="detail-table-body">
@@ -183,13 +183,13 @@ function populateRangeSelect(period) {
     const sel = document.getElementById('range-select');
     sel.innerHTML = '';
     if (period === 'weekly') {
-        ['Minggu Ini', 'Minggu Lalu', '2 Minggu Lalu', '3 Minggu Lalu'].forEach((label, i) => {
+        ['This Week', 'Last Week', '2 Weeks Ago', '3 Weeks Ago'].forEach((label, i) => {
             const o = document.createElement('option');
             o.value = i; o.textContent = label; sel.appendChild(o);
         });
     } else if (period === 'monthly') {
-        const months = ['Januari','Februari','Maret','April','Mei','Juni',
-                        'Juli','Agustus','September','Oktober','November','Desember'];
+        const months = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
         const now = new Date();
         for (let i = 0; i < 6; i++) {
             const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -202,7 +202,7 @@ function populateRangeSelect(period) {
         const year = new Date().getFullYear();
         [year, year-1, year-2].forEach((y, i) => {
             const o = document.createElement('option');
-            o.value = i; o.textContent = 'Tahun ' + y; sel.appendChild(o);
+            o.value = i; o.textContent = 'Year ' + y; sel.appendChild(o);
         });
     }
 }
@@ -211,13 +211,13 @@ function onRangeChange(val) { renderAll(); }
 
 // ─── METRIC CARDS ────────────────────────────────────────────────────────
 const METRICS_CONF = [
-    { key: 'total',     label: 'Total Reservasi', icon: '#3b82f6', bg: '#eef9ff',
+    { key: 'total',     label: 'Total Reservations', icon: '#3b82f6', bg: '#eef9ff',
       svgPath: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>' },
-    { key: 'approved',  label: 'Disetujui',       icon: '#16a34a', bg: '#f0fdf4',
+    { key: 'approved',  label: 'Approved',       icon: '#16a34a', bg: '#f0fdf4',
       svgPath: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>' },
-    { key: 'rejected',  label: 'Ditolak',         icon: '#ef4444', bg: '#fef2f2',
+    { key: 'rejected',  label: 'Rejected',         icon: '#ef4444', bg: '#fef2f2',
       svgPath: '<circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>' },
-    { key: 'cancelled', label: 'Dibatalkan',      icon: '#6b7280', bg: '#f3f4f6',
+    { key: 'cancelled', label: 'Cancelled',      icon: '#6b7280', bg: '#f3f4f6',
       svgPath: '<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/>' },
 ];
 
@@ -258,7 +258,7 @@ function renderBarChart(data) {
     const chart  = document.getElementById('bar-chart');
     const labels = document.getElementById('bar-labels');
     const bars   = data.trend ?? [];
-    if (!bars.length) { chart.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">Tidak ada data.</p>'; return; }
+    if (!bars.length) { chart.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">No data available.</p>'; return; }
 
     const maxVal = Math.max(...bars.map(b => (b.approved||0) + (b.rejected||0) + (b.pending||0)), 1);
     const H = 180;
@@ -271,8 +271,8 @@ function renderBarChart(data) {
         return `
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;justify-content:flex-end;height:${H}px;">
             <div class="bar" style="width:100%;height:${pe}px;background:#D4AF37;" title="Pending: ${b.pending||0}"></div>
-            <div class="bar" style="width:100%;height:${rj}px;background:#ef4444;" title="Ditolak: ${b.rejected||0}"></div>
-            <div class="bar" style="width:100%;height:${ap}px;background:#0A1628;" title="Disetujui: ${b.approved||0}"></div>
+            <div class="bar" style="width:100%;height:${rj}px;background:#ef4444;" title="Rejected: ${b.rejected||0}"></div>
+            <div class="bar" style="width:100%;height:${ap}px;background:#0A1628;" title="Approved: ${b.approved||0}"></div>
         </div>`;
     }).join('');
 
@@ -286,14 +286,14 @@ function renderDonut(data) {
     const dist   = data.status_dist ?? {};
 
     const COLORS = { approved:'#0A1628', pending:'#D4AF37', rejected:'#ef4444', cancelled:'#6b7280' };
-    const LABELS = { approved:'Disetujui', pending:'Pending', rejected:'Ditolak', cancelled:'Dibatalkan' };
+    const LABELS = { approved:'Approved', pending:'Pending', rejected:'Rejected', cancelled:'Cancelled' };
     const keys   = Object.keys(COLORS);
     const sum    = keys.reduce((s, k) => s + (dist[k]||0), 0);
 
     if (sum === 0) {
         svg.querySelectorAll('.donut-arc').forEach(e => e.remove());
         svg.querySelector('circle').setAttribute('stroke', '#f0f1f5');
-        legend.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">Belum ada data.</p>';
+        legend.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">No data available.</p>';
         total.textContent = '';
         return;
     }
@@ -329,13 +329,13 @@ function renderDonut(data) {
             <span class="legend-value">${val} (${Math.round(pct*100)}%)</span>
         </div>`).join('');
 
-    total.textContent = `Total: ${sum} reservasi`;
+    total.textContent = `Total: ${sum} reservations`;
 }
 
 function renderTopRooms(data) {
     const body  = document.getElementById('top-rooms-body');
     const rooms = data.room_usage ?? [];
-    if (!rooms.length) { body.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;padding:16px 0;">Tidak ada data.</p>'; return; }
+    if (!rooms.length) { body.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;padding:16px 0;">No data available.</p>'; return; }
 
     const RANK_COLORS = ['#D4AF37', '#9baac4', '#cd7f32'];
     const max = rooms[0].count || 1;
@@ -348,7 +348,7 @@ function renderTopRooms(data) {
                     <div style="background:#0A1628;height:7px;border-radius:99px;width:${Math.round((r.count/max)*100)}%;transition:width 0.5s;"></div>
                 </div>
             </div>
-            <div style="font-size:0.9rem;font-weight:700;color:#0A1628;min-width:32px;text-align:right;">${r.count} <span style="font-size:0.7rem;color:#9baac4;font-weight:400;">reservasi</span></div>
+            <div style="font-size:0.9rem;font-weight:700;color:#0A1628;min-width:32px;text-align:right;">${r.count} <span style="font-size:0.7rem;color:#9baac4;font-weight:400;">reservations</span></div>
         </div>`).join('');
 
     body.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:8px;">${items}</div>`;
@@ -358,7 +358,7 @@ function renderRoomUsage(data) {
     const body = document.getElementById('room-usage-body');
     if (!body) return;
     const rooms = data.room_usage ?? [];
-    if (!rooms.length) { body.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">Tidak ada data.</p>'; return; }
+    if (!rooms.length) { body.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">No data available.</p>'; return; }
 
     const maxCount = Math.max(...rooms.map(r => r.count), 1);
     const COLORS   = ['#0A1628','#1e3a6b','#2d5aa0','#3b7fd4','#6baed6'];
@@ -378,9 +378,9 @@ function renderRoomUsage(data) {
 
 function renderTopEvents(data) {
     const body  = document.getElementById('top-events-body');
-    if (!body) return;  // elemen tidak ada di halaman ini
+    if (!body) return;  // element not present on this page
     const types = data.event_types ?? [];
-    if (!types.length) { body.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">Tidak ada data.</p>'; return; }
+    if (!types.length) { body.innerHTML = '<p style="color:#9baac4;font-size:0.8rem;">No data available.</p>'; return; }
 
     const RANK_COLORS = ['#D4AF37','#9baac4','#cd7f32'];
     body.innerHTML = types.map((t, i) => `
@@ -388,7 +388,7 @@ function renderTopEvents(data) {
             <div class="rank-badge" style="background:${RANK_COLORS[i] || '#f0f1f5'};color:${i < 3 ? '#fff' : '#6b7280'};">${i+1}</div>
             <div style="flex:1;">
                 <div style="font-size:0.85rem;font-weight:600;color:#111827;">${t.type}</div>
-                <div style="font-size:0.73rem;color:#9baac4;">${t.count} reservasi</div>
+                <div style="font-size:0.73rem;color:#9baac4;">${t.count} reservations</div>
             </div>
             <div style="font-size:0.8rem;font-weight:700;color:#0A1628;">${t.pct}%</div>
         </div>`).join('');
@@ -404,13 +404,13 @@ function renderAll() {
     renderTopRooms(data);
     renderTopEvents(data);
 
-    // Judul tabel: "Detail Reservasi Bulanan – Juni 2026" dll
-    const periodLabel = currentPeriod === 'weekly'  ? 'Mingguan' :
-                        currentPeriod === 'monthly' ? 'Bulanan'  : 'Tahunan';
+    // Table title: "Weekly Reservation Details – June 2026" etc.
+    const periodLabel = currentPeriod === 'weekly'  ? 'Weekly' :
+                        currentPeriod === 'monthly' ? 'Monthly'  : 'Yearly';
     document.getElementById('detail-table-title').textContent =
-        `Detail Reservasi ${periodLabel} – ${data.label}`;
+        `${periodLabel} Reservation Details – ${data.label}`;
 
-    // Reset search & render tabel pakai rows yang sudah difilter dari getDataForPeriod
+    // Reset search & render table using rows already filtered from getDataForPeriod
     const searchEl = document.getElementById('table-search');
     if (searchEl) searchEl.value = '';
     renderDetailTable(data.rows);
@@ -498,7 +498,7 @@ function getDataForPeriod(period, rangeIdx) {
 
 function buildTrend(items, period, range) {
     if (period === 'weekly') {
-        const days  = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+        const days  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
         const start = new Date(range.start);
         return days.map((label, i) => {
             const d = new Date(start); d.setDate(start.getDate() + i);
@@ -535,7 +535,7 @@ function buildTrend(items, period, range) {
         });
     }
     
-    const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const year   = parseInt(range.start.split('-')[0]);
     return MONTHS.map((label, i) => {
         const m = String(i+1).padStart(2,'0');
@@ -551,15 +551,15 @@ function buildTrend(items, period, range) {
 
 function buildLabel(period, rangeIdx, range) {
     if (period === 'weekly') {
-        const labels = ['Minggu Ini','Minggu Lalu','2 Minggu Lalu','3 Minggu Lalu'];
+        const labels = ['This Week','Last Week','2 Weeks Ago','3 Weeks Ago'];
         return labels[rangeIdx] ?? range.start;
     }
     if (period === 'monthly') {
-        const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const d = new Date(); d.setMonth(d.getMonth() - rangeIdx);
         return months[d.getMonth()] + ' ' + d.getFullYear();
     }
-    return 'Tahun ' + (new Date().getFullYear() - rangeIdx);
+    return 'Year ' + (new Date().getFullYear() - rangeIdx);
 }
 
 // ─── DETAIL TABLE (client-side, period-aware, search across all pages) ───────
@@ -568,7 +568,7 @@ let detailCurrentPage = 1;
 let detailFilteredRows = [];
 
 function filterDetailTable(q) {
-    // Reset ke halaman 1 setiap kali search berubah
+    // Reset to page 1 every time search changes
     detailCurrentPage = 1;
     renderDetailTable();
 }
@@ -576,13 +576,13 @@ function filterDetailTable(q) {
 function renderDetailTable(rows) {
     const q = (document.getElementById('table-search')?.value || '').toLowerCase().trim();
 
-    // Kalau rows diberikan (dari renderAll), simpan sebagai dataset aktif
+    // If rows are provided (from renderAll), store as active dataset
     if (rows !== undefined) {
         detailFilteredRows = rows;
         detailCurrentPage = 1;
     }
 
-    // Filter berdasarkan search query — mencakup SEMUA data, bukan hanya halaman ini
+    // Filter based on search query — covers ALL data, not just current page
     const filtered = q
         ? detailFilteredRows.filter(r =>
             r.event_name.toLowerCase().includes(q) ||
@@ -597,13 +597,13 @@ function renderDetailTable(rows) {
     const paged  = filtered.slice(start, start + DETAIL_PAGE_SIZE);
 
     const STATUS_BADGE = {
-        approved:  { cls: 'badge-approved',  label: 'Disetujui'  },
-        rejected:  { cls: 'badge-rejected',  label: 'Ditolak'    },
-        cancelled: { cls: 'badge-cancelled', label: 'Dibatalkan' },
+        approved:  { cls: 'badge-approved',  label: 'Approved'   },
+        rejected:  { cls: 'badge-rejected',  label: 'Rejected'   },
+        cancelled: { cls: 'badge-cancelled', label: 'Cancelled'  },
         pending:   { cls: 'badge-pending',   label: 'Pending'    },
     };
 
-    const MONTHS_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    const MONTHS_ID = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     function fmtDate(ds) {
         const d = new Date(ds + 'T00:00:00');
         return `${String(d.getDate()).padStart(2,'0')} ${MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
@@ -612,7 +612,7 @@ function renderDetailTable(rows) {
     const tbody = document.getElementById('detail-table-body');
     if (!paged.length) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:#9baac4;">${
-            q ? `Tidak ada hasil untuk "<strong>${q}</strong>".` : 'Tidak ada data reservasi.'
+            q ? `No results for "<strong>${q}</strong>".` : 'No reservation data found.'
         }</td></tr>`;
     } else {
         tbody.innerHTML = paged.map(r => {
@@ -701,7 +701,7 @@ function exportCSV() {
     })();
 
     const items = RAW.filter(r => r.date >= range.start && r.date <= range.end);
-    const header = ['Event','Tipe','Pemohon','Ruangan','Tanggal','Jam Mulai','Jam Selesai','Peserta','Status'];
+    const header = ['Event','Type','Requester','Room','Date','Start Time','End Time','Attendees','Status'];
     const rows = items.map(r => [
         `"${r.event_name}"`, r.event_type, `"${r.pic_name}"`, `"${r.room}"`,
         r.date, r.start_time, r.end_time, r.attendees, r.status
@@ -713,7 +713,7 @@ function exportCSV() {
     a.href = url; a.download = `report_${data.label.replace(/\s+/g,'-')}.csv`; a.click();
     URL.revokeObjectURL(url);
 
-    alert("Berhasil diexport")
+    alert("Export successful")
 }
 
 function printReport() { window.print(); }

@@ -8,11 +8,46 @@
 <div class="page-body">
 
     {{-- Filter Tabs + Search --}}
-    <div style="margin-bottom:20px;">
+    <style>
+        .filter-row-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-tabs-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            flex: 1;
+        }
+        .filter-tabs-scroll::-webkit-scrollbar { display: none; }
+        .filter-tabs-inner {
+            display: inline-flex;
+            gap: 8px;
+            min-width: max-content;
+        }
+        .filter-search-wrap { flex-shrink: 0; }
+        .filter-search-wrap input {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 0.8rem;
+            color: #374151;
+            outline: none;
+            width: 240px;
+        }
+        @media (max-width: 640px) {
+            .filter-row-wrap { flex-wrap: wrap; }
+            .filter-tabs-scroll { width: 100%; flex: none; }
+            .filter-search-wrap { width: 100%; }
+            .filter-search-wrap input { width: 100%; box-sizing: border-box; }
+        }
+    </style>
 
-        {{-- Tab strip: scrollable horizontally on mobile --}}
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:12px;">
-            <div style="display:inline-flex;gap:8px;min-width:max-content;padding-bottom:2px;">
+    <div class="filter-row-wrap">
+        <div class="filter-tabs-scroll">
+            <div class="filter-tabs-inner">
                 @foreach(['', 'pending', 'approved', 'rejected', 'cancelled'] as $s)
                 <button onclick="setStatusFilter('{{ $s }}')"
                    id="tab-{{ $s ?: 'all' }}"
@@ -25,14 +60,11 @@
                 @endforeach
             </div>
         </div>
-
-        {{-- Search bar below tabs, full width --}}
-        <div>
-            <input type="text" id="search-approvals" placeholder="Search…"
-                   style="border:1px solid #e5e7eb;border-radius:8px;padding:7px 14px;font-size:0.8rem;color:#374151;outline:none;width:100%;box-sizing:border-box;"
+        <div class="filter-search-wrap">
+            <input type="text" id="search-approvals"
+                   placeholder="Search by event, applicant, or ID…"
                    oninput="liveSearchApprovals(this.value)">
         </div>
-
     </div>
 
     <div class="stat-card" style="padding:0;overflow:hidden;">
