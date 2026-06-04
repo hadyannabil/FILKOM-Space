@@ -3,7 +3,7 @@
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
     
     <div class="h-48 overflow-hidden">
-        <img src="{{ asset('assets/dashboard/' . $image) }}" 
+        <img src="{{ asset('assets/rooms/' . $image) }}" 
              alt="{{ $title }}" 
              class="w-full h-full object-cover">
     </div>

@@ -33,11 +33,12 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Room F2.4',            'building' => 'F Building',   'floor' => '2nd Floor', 'capacity' => 40,  'type' => 'classroom',    'image' => 'ruang-kelas.webp',         'facilities' => ['Projector','AC','Whiteboard']],
             ['name' => 'Room F3.4',            'building' => 'F Building',   'floor' => '3rd Floor', 'capacity' => 40,  'type' => 'classroom',    'image' => 'ruang-kelas.webp',         'facilities' => ['Projector','AC','Whiteboard']],
             ['name' => 'Room F4.4',            'building' => 'F Building',   'floor' => '4th Floor', 'capacity' => 40,  'type' => 'classroom',    'image' => 'ruang-kelas.webp',         'facilities' => ['Projector','AC','Whiteboard']],
-            ['name' => 'Room F2.5',            'building' => 'F Building',   'floor' => '2nd Floor', 'capacity' => 35,  'type' => 'classroom',    'image' => 'ruang-kelas.webp',         'facilities' => ['Projector','AC']],
-            ['name' => 'Lab G1.3',             'building' => 'G Building',   'floor' => '1st Floor', 'capacity' => 30,  'type' => 'lab',          'image' => 'lab.webp',                 'facilities' => ['Komputer','AC','Projector']],
-            ['name' => 'Lab G1.6',             'building' => 'G Building',   'floor' => '1st Floor', 'capacity' => 30,  'type' => 'lab',          'image' => 'lab.webp',                 'facilities' => ['Komputer','AC','Projector']],
+            ['name' => 'Room F2.5',            'building' => 'F Building',   'floor' => '2nd Floor', 'capacity' => 40,  'type' => 'classroom',    'image' => 'ruang-kelas.webp',         'facilities' => ['Projector','AC']],
+            ['name' => 'Lab G1.3',             'building' => 'G Building',   'floor' => '1st Floor', 'capacity' => 40,  'type' => 'lab',          'image' => 'lab.webp',                 'facilities' => ['Komputer','AC','Projector']],
+            ['name' => 'Lab G1.6',             'building' => 'G Building',   'floor' => '1st Floor', 'capacity' => 40,  'type' => 'lab',          'image' => 'lab.webp',                 'facilities' => ['Komputer','AC','Projector']],
             ['name' => 'GKM4.3',               'building' => 'GKM Building', 'floor' => '4th Floor', 'capacity' => 80,  'type' => 'meeting_room', 'image' => 'ruang-kelas.webp',         'facilities' => ['Projector','AC','Meja Rapat']],
-            ['name' => 'Algorithm Auditorium', 'building' => 'G Building',   'floor' => '2nd Floor', 'capacity' => 150, 'type' => 'auditorium',   'image' => 'auditorium-algoritma.webp','facilities' => ['Sound System','Projector','AC','Podium']],
+            ['name' => 'Algorithm Auditorium', 'building' => 'G Building',   'floor' => '2nd Floor', 'capacity' => 300, 'type' => 'auditorium',   'image' => 'auditorium-algoritma.webp','facilities' => ['Sound System','Projector','AC','Podium']],
+            ['name' => 'Mini Theater Heuristik', 'building' => 'A Building', 'floor' => '2st Floor', 'capacity' => 100, 'type' => 'auditorium',   'image' => 'mini-theater-heuristik.webp', 'facilities' => ['Sound System','Projector','AC','Podium']],
         ];
 
         foreach ($rooms as $room) {
