@@ -61,7 +61,6 @@
                 <input type="hidden" name="capacity" value="{{ $selectedCapacity }}">
             @endif
 
-
         </form>
     </section>
 
@@ -93,12 +92,14 @@
 
                     <div>
                         <h4 class="text-sm font-semibold text-gray-700 mb-2">Capacity Range</h4>
-                        @foreach (['1-50' => '1-50 people', '51-100' => '51-100 people', '101-200' => '101-200 people'] as $val => $label)
+                        @foreach (['1-50' => '1-50 people', '51-100' => '51-100 people', '101+' => 'More than 100 people'] as $val => $label)
                             <label class="flex items-center gap-2 mb-2 text-gray-600 cursor-pointer">
                                 <input type="radio"
                                        name="capacity"
                                        value="{{ $val }}"
                                        {{ $selectedCapacity === $val ? 'checked' : '' }}
+                                       data-was-checked="{{ $selectedCapacity === $val ? 'true' : 'false' }}"
+                                       onclick="handleCapacityClick(this)"
                                        onchange="document.getElementById('filter-form').submit()">
                                 {{ $label }}
                             </label>
@@ -142,4 +143,17 @@
         </div>
 
     </div>
+
+    <script>
+    function handleCapacityClick(el) {
+        if (el.dataset.wasChecked === 'true') {
+            el.checked = false;
+            el.dataset.wasChecked = 'false';
+            document.getElementById('filter-form').submit();
+        } else {
+            document.querySelectorAll('input[name="capacity"]').forEach(r => r.dataset.wasChecked = 'false');
+            el.dataset.wasChecked = 'true';
+        }
+    }
+    </script>
 </x-layout>

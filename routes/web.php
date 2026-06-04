@@ -125,8 +125,13 @@ Route::middleware('user.only')->group(function () {
             }
 
             if ($selectedCapacity !== '') {
-                [$min, $max] = explode('-', $selectedCapacity);
-                $query->whereBetween('capacity', [(int) $min, (int) $max]);
+                if (str_contains($selectedCapacity, '+')) {
+                    $min = (int) str_replace('+', '', $selectedCapacity);
+                    $query->where('capacity', '>=', $min);
+                } else {
+                    [$min, $max] = explode('-', $selectedCapacity);
+                    $query->whereBetween('capacity', [(int) $min, (int) $max]);
+                }
             }
 
             $allRooms = $query->get()->map(fn ($r) => [
