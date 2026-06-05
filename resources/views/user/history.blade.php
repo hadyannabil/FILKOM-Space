@@ -12,53 +12,53 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
             
-            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-5">
-                <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="bg-white p-4 sm:p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3 sm:gap-5">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 font-medium mb-1">Total Bookings</p>
-                    <h3 class="text-2xl font-bold text-[#0A1628] leading-none">{{ $total ?? 0 }}</h3>
+                    <h3 class="text-xl sm:text-2xl font-bold text-[#0A1628] leading-none">{{ $total ?? 0 }}</h3>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-5">
-                <div class="w-12 h-12 rounded-lg bg-yellow-50 text-yellow-500 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="bg-white p-4 sm:p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3 sm:gap-5">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-yellow-50 text-yellow-500 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 font-medium mb-1">Pending</p>
-                    <h3 class="text-2xl font-bold text-[#0A1628] leading-none">{{ $pending }}</h3>
+                    <h3 class="text-xl sm:text-2xl font-bold text-[#0A1628] leading-none">{{ $pending }}</h3>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-5">
-                <div class="w-12 h-12 rounded-lg bg-green-50 text-green-500 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="bg-white p-4 sm:p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3 sm:gap-5">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-green-50 text-green-500 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 font-medium mb-1">Approved</p>
-                    <h3 class="text-2xl font-bold text-[#0A1628] leading-none">{{ $approved }}</h3>
+                    <h3 class="text-xl sm:text-2xl font-bold text-[#0A1628] leading-none">{{ $approved }}</h3>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-5">
-                <div class="w-12 h-12 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="bg-white p-4 sm:p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3 sm:gap-5">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 font-medium mb-1">Rejected</p>
-                    <h3 class="text-2xl font-bold text-[#0A1628] leading-none">{{ $rejected }}</h3>
+                    <h3 class="text-xl sm:text-2xl font-bold text-[#0A1628] leading-none">{{ $rejected }}</h3>
                 </div>
             </div>
 

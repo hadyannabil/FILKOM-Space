@@ -128,7 +128,7 @@
             </div>
 
             <div id="drawer-filters-section" style="border-top:1px solid #e5e7eb;padding:12px 0;">
-                <div class="drawer-section-title">Filter Ruangan</div>
+                <div class="drawer-section-title">Filters</div>
                 <form action="{{ route('dashboard') }}" method="GET" id="drawer-filter-form">
                     <input type="hidden" name="date" id="df-date">
                     <input type="hidden" name="start_time" id="df-start">
@@ -136,7 +136,7 @@
                     <input type="hidden" name="room_filter" id="df-room">
 
                     <div style="padding:4px 0 10px;">
-                        <div class="drawer-section-title" style="padding-top:6px;">Gedung</div>
+                        <div class="drawer-section-title" style="padding-top:6px;">Building Location</div>
                         @foreach (['A Building' => 'Gedung A', 'F Building' => 'Gedung F', 'G Building' => 'Gedung G', 'GKM Building' => 'Gedung GKM'] as $value => $label)
                         <label class="drawer-filter-label">
                             <input type="checkbox" name="buildings[]" value="{{ $value }}"
@@ -148,12 +148,13 @@
                     </div>
 
                     <div style="padding:4px 0 10px;border-top:1px solid #f3f4f6;">
-                        <div class="drawer-section-title" style="padding-top:10px;">Kapasitas</div>
-                        @foreach (['1-50' => '1-50 orang', '51-100' => '51-100 orang', '101-200' => '101-200 orang'] as $val => $label)
-                        <label class="drawer-filter-label">
+                        <div class="drawer-section-title" style="padding-top:10px;">Capacity Range</div>
+                        @foreach (['1-50' => '1-50 people', '51-100' => '51-100 people', '101+' => 'More than 100 people'] as $val => $label)
+                        <label class="drawer-filter-label" onclick="toggleDrawerCapacity(event, '{{ $val }}')">
                             <input type="radio" name="capacity" value="{{ $val }}"
                                    {{ request('capacity') === $val ? 'checked' : '' }}
-                                   onchange="document.getElementById('drawer-filter-form').submit()">
+                                   style="pointer-events:none;"
+                                   accent-color="#D4AF37">
                             {{ $label }}
                         </label>
                         @endforeach
@@ -334,6 +335,7 @@
     <main>
         {{ $slot }}
     </main>
+
     <script>
         function openDrawer() {
             document.getElementById('mobile-drawer').classList.add('open');
@@ -345,25 +347,49 @@
             if (df('df-end'))   df('df-end').value   = params.get('end_time')    || '';
             if (df('df-room'))  df('df-room').value  = params.get('room_filter') || 'all';
         }
+
         function closeDrawer() {
             document.getElementById('mobile-drawer').classList.remove('open');
             document.body.style.overflow = '';
         }
+
         document.getElementById('drawer-overlay').addEventListener('click', closeDrawer);
 
         var isDashboard = window.location.pathname === '/' || window.location.pathname === '/dashboard';
         var filterSec = document.getElementById('drawer-filters-section');
         if (filterSec && !isDashboard) filterSec.style.display = 'none';
 
-        // ── Notifikasi ──────────────────────────────────────────────
+        // Toggle capacity radio — klik lagi untuk deselect
+        function toggleDrawerCapacity(event, val) {
+            event.preventDefault();
+            const form  = document.getElementById('drawer-filter-form');
+            const radios = form.querySelectorAll('input[name="capacity"]');
+            let targetRadio = null;
+
+            radios.forEach(r => {
+                if (r.value === val) targetRadio = r;
+            });
+
+            if (!targetRadio) return;
+
+            if (targetRadio.checked) {
+                // Sudah aktif → uncheck (hapus filter)
+                targetRadio.checked = false;
+            } else {
+                // Belum aktif → pilih ini, hapus yang lain
+                radios.forEach(r => r.checked = false);
+                targetRadio.checked = true;
+            }
+
+            form.submit();
+        }
+
         const csrfToken = '{{ csrf_token() }}';
 
         async function markRead(id, el) {
-            // Update UI langsung tanpa tunggu response
             el.classList.remove('bg-blue-50/50');
             el.classList.add('bg-white');
 
-            // Kurangi badge
             const badge = document.getElementById('notif-badge');
             if (badge) {
                 const current = parseInt(badge.textContent) || 0;
@@ -389,13 +415,11 @@
         }
 
         async function markAllRead() {
-            // Update semua item UI
             document.querySelectorAll('#notif-list > div').forEach(el => {
                 el.classList.remove('bg-blue-50/50');
                 el.classList.add('bg-white');
             });
 
-            // Sembunyikan badge
             const badge = document.getElementById('notif-badge');
             if (badge) badge.style.display = 'none';
 
