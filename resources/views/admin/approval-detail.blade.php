@@ -47,10 +47,12 @@
             <div style="margin-bottom:18px;">
                 <label style="font-size:0.75rem;font-weight:600;color:#9baac4;text-transform:uppercase;letter-spacing:0.05em;">Date &amp; Time</label>
                 <p style="font-size:0.95rem;font-weight:700;color:#111827;margin:6px 0 4px;">
-                    📅 {{ \Carbon\Carbon::parse($reservation->reservation_date)->format('F j, Y') }}
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    {{ \Carbon\Carbon::parse($reservation->reservation_date)->format('F j, Y') }}
                 </p>
                 <p style="font-size:0.9rem;color:#374151;margin:0;">
-                    🕐 {{ substr($reservation->start_time,0,5) }} – {{ substr($reservation->end_time,0,5) }}
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    {{ substr($reservation->start_time,0,5) }} – {{ substr($reservation->end_time,0,5) }}
                 </p>
             </div>
 
@@ -77,8 +79,9 @@
                     ];
                     $s = $statusMap[$reservation->status] ?? ['label'=>ucfirst($reservation->status),'class'=>'badge-cancelled'];
                 @endphp
-                <span class="{{ $s['class'] }}" style="padding:4px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;">
-                    ⏳ {{ $s['label'] }}
+                <span class="{{ $s['class'] }}" style="padding:4px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;display:inline-flex;align-items:center;gap:5px;">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:12px;height:12px;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    {{ $s['label'] }}
                 </span>
             </div>
 
@@ -116,16 +119,36 @@
                     <p style="font-size:0.9rem;font-weight:700;color:#111827;margin:0 0 4px;">Request Letter.pdf</p>
                     <p style="font-size:0.78rem;color:#9baac4;margin:0 0 16px;">Official request document submitted by the requester</p>
                     <div style="display:flex;gap:10px;justify-content:center;">
+                        {{-- View Document: buka modal PDF inline --}}
+                        <button onclick="document.getElementById('pdf-modal-{{ $reservation->id }}').style.display='flex'"
+                            style="background:#0A1628;color:#fff;padding:9px 20px;border-radius:8px;font-size:0.8rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:none;cursor:pointer;">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            View Document
+                        </button>
+                        {{-- Open in New Tab: buka tab baru --}}
                         <a href="{{ Storage::url($reservation->approval_letter) }}" target="_blank"
-                           style="background:#0A1628;color:#fff;padding:9px 20px;border-radius:8px;font-size:0.8rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                            👁 View Document
-                        </a>
-                        <a href="{{ Storage::url($reservation->approval_letter) }}" target="_blank"
-                           style="background:#fff;border:1.5px solid #e5e7eb;color:#374151;padding:9px 20px;border-radius:8px;font-size:0.8rem;font-weight:600;text-decoration:none;">
-                            ↗ Open in New Tab
+                           style="background:#fff;border:1.5px solid #e5e7eb;color:#374151;padding:9px 20px;border-radius:8px;font-size:0.8rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            Open in New Tab
                         </a>
                     </div>
                 </div>
+
+                {{-- Modal PDF Viewer --}}
+                <div id="pdf-modal-{{ $reservation->id }}"
+                     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;"
+                     onclick="if(event.target===this)this.style.display='none'">
+                    <div style="background:#fff;border-radius:12px;width:90%;max-width:900px;height:90vh;display:flex;flex-direction:column;overflow:hidden;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #e5e7eb;">
+                            <span style="font-weight:700;color:#0A1628;">Request Letter.pdf</span>
+                            <button onclick="document.getElementById('pdf-modal-{{ $reservation->id }}').style.display='none'"
+                                    style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#6b7280;">✕</button>
+                        </div>
+                        <iframe src="{{ Storage::url($reservation->approval_letter) }}"
+                                style="flex:1;border:none;width:100%;"></iframe>
+                    </div>
+                </div>
+
                 @else
                 <div style="border:2px dashed #e5e7eb;border-radius:12px;padding:30px;text-align:center;color:#9baac4;font-size:0.875rem;">
                     No supporting document uploaded.
@@ -137,7 +160,6 @@
             <div class="stat-card">
                 <h3 style="font-size:0.95rem;font-weight:700;color:#0A1628;margin:0 0 14px;">Take Action</h3>
 
-                {{-- Rejection reason (shown/hidden by JS DOM) --}}
                 <div style="margin-bottom:14px;">
                     <label style="font-size:0.8rem;font-weight:600;color:#374151;margin-bottom:6px;display:block;">
                         Rejection Reason <span style="color:#9baac4;font-weight:400;">(Optional)</span>
