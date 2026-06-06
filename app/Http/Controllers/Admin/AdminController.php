@@ -123,6 +123,16 @@ class AdminController extends Controller
         return view('admin.approval-detail', compact('reservation'));
     }
 
+    public function viewLetter($id)
+    {
+        $reservation = Reservation::findOrFail($id);
+        $path = storage_path('app/public/' . $reservation->approval_letter);
+
+        abort_unless(file_exists($path), 404);
+
+        return response()->file($path, ['Content-Type' => 'application/pdf']);
+    }
+
     public function approve(Reservation $reservation)
     {
         $reservation->load('room');

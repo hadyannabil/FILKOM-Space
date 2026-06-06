@@ -76,6 +76,9 @@ Route::middleware(['auth', 'admin.only'])
     Route::post('/approvals/{reservation}/reject',  [AdminController::class, 'reject'])->name('approval.reject');
     Route::get('/reports',                 [AdminController::class, 'reports'])->name('reports');
 
+    // Route untuk serve file letter
+    Route::get('/letter/{id}', [AdminController::class, 'viewLetter'])->name('letter.view');
+
     Route::post('/notifications/{id}/read', function ($id) {
         $notif = \App\Models\Notification::where('id', $id)
             ->where('user_id', Auth::id())

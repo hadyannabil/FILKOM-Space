@@ -98,7 +98,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                     <h3 style="font-size:1rem;font-weight:700;color:#0A1628;margin:0;">Supporting Document</h3>
                     @if($reservation->approval_letter)
-                    <a href="{{ Storage::url($reservation->approval_letter) }}" download
+                    <a href="{{ route('admin.letter.view', $reservation->id) }}" download
                        style="display:inline-flex;align-items:center;gap:6px;background:#f8f9fc;border:1px solid #e5e7eb;border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:600;color:#374151;text-decoration:none;">
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                         Download Letter
@@ -126,7 +126,7 @@
                             View Document
                         </button>
                         {{-- Open in New Tab: buka tab baru --}}
-                        <a href="{{ Storage::url($reservation->approval_letter) }}" target="_blank"
+                        <a href="{{ route('admin.letter.view', $reservation->id) }}" target="_blank"
                            style="background:#fff;border:1.5px solid #e5e7eb;color:#374151;padding:9px 20px;border-radius:8px;font-size:0.8rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                             Open in New Tab
@@ -144,7 +144,7 @@
                             <button onclick="document.getElementById('pdf-modal-{{ $reservation->id }}').style.display='none'"
                                     style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#6b7280;">✕</button>
                         </div>
-                        <iframe src="{{ Storage::url($reservation->approval_letter) }}"
+                        <iframe src="{{ route('admin.letter.view', $reservation->id) }}"
                                 style="flex:1;border:none;width:100%;"></iframe>
                     </div>
                 </div>
