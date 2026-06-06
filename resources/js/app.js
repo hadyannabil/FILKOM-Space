@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (notifBtn && notifDropdown) {
         notifBtn.addEventListener('click', function() {
             notifDropdown.classList.toggle('hidden');
-            // Tutup profil jika lonceng diklik
+            
             if (profileDropdown) profileDropdown.classList.add('hidden'); 
         });
     }
@@ -19,14 +19,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (profileBtn && profileDropdown) {
         profileBtn.addEventListener('click', function() {
             profileDropdown.classList.toggle('hidden');
-            // Tutup notifikasi jika profil diklik
+            
             if (notifDropdown) notifDropdown.classList.add('hidden');
         });
     }
 
     document.addEventListener('click', function(event) {
         
-        // Cek apakah klik berada di luar area notifikasi
         if (notifBtn && notifDropdown && !notifBtn.contains(event.target) && !notifDropdown.contains(event.target)) {
             notifDropdown.classList.add('hidden');
         }
